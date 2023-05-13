@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "array": "cpp",
+        "*.tcc": "cpp",
+        "memory_resource": "cpp",
+        "iostream": "cpp",
+        "cmath": "cpp"
+    }
+}
