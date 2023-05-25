@@ -62,17 +62,15 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
             P_vorticity[mu] += 0.5*pdSigma * nf *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * sinh(sqrt(-theta_sq)*0.5)/
                         (cosh(sqrt(-theta_sq)*0.5)+exp(-(pu - mutot)/cell.T));
-            for(int nu=0; nu<4; nu++)
-                for(int rh=0; rh<4; rh++)
-                    for(int sg=0; sg<3; sg++) {  //since we are at midrapidity p_[3]=0 and we can stop at sg=2
-                        // computing the shear induced polarization
-                        if(nu==0)
-                        for(int ta=0; ta<4; ta++)
-                        P_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
-                                    * p_[sg] * p[ta] / p[0] * t_vector[nu]
-                                    * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
-                    }
-            P_shear[mu] *= hbarC; //Unit conversion to make the shear adimensional
+
+            for(int rh=0; rh<4; rh++)
+                for(int sg=0; sg<3; sg++) {  //since we are at midrapidity p_[3]=0 and we can stop at sg=2
+                    // computing the shear induced polarization
+
+                    for(int ta=0; ta<4; ta++)
+                    P_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, 0, rh, sg)* p_[sg] * p[ta] / p[0] 
+                                * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
+                }
         }
     }
 
@@ -81,7 +79,7 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
     for(int mu=0; mu<4; mu++)
         fileout << "   " << P_vorticity[mu];
     for(int mu=0; mu<4; mu++)
-        fileout << "   " << P_shear[mu]; 
+        fileout << "   " << P_shear[mu] *hbarC; //Unit conversion to make the shear adimensional 
     fileout << endl;
 
 }
