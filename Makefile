@@ -16,6 +16,11 @@ $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OPEN_MP_FLAG)$^ -o $@
 	@echo "Compilation successful!"
 
+$(OBJECTS): | $(OBJ_DIR)
+
+$(OBJ_DIR):
+	@mkdir -p $(OBJ_DIR)
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $(OPEN_MP_FLAG) -c $< -o $@
 
