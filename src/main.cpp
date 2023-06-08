@@ -29,16 +29,19 @@ ofstream fout(output_file);
 
 int size_pt = 31;
 int size_phi = 40;
+int size_y = 20;
 vector<double> pT = linspace(0,6.2,size_pt);
 vector<double> phi =  linspace(0,2*PI,size_phi);
+vector<double> y_rap =  linspace(-1,1,size_y);
+
 pdg_particle lambda(3122);
 lambda.print();
-
-for(double ipt : pT){
-    for(double iphi : phi){
-        polarization_midrapidity(ipt, iphi, lambda, hypersup, fout);
-    }
-}
+for(double iy : y_rap)
+	for(double ipt : pT){
+		for(double iphi : phi){
+			polarization_rapidity(ipt, iphi, iy, lambda, hypersup, fout);
+		}
+	}
 cout<<"The calculation is done!"<<endl;
 return 0;
 }

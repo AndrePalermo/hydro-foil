@@ -17,6 +17,8 @@ using namespace std;
 //refer to 2009.13449
 void polarization_midrapidity(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
+void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
+
 void shear_correction_to_spectra(double pT, double phi, double Dt, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
 #endif
