@@ -15,7 +15,7 @@ std::vector<double> linspace(double min, double max, int size){
     std::vector<double> result;
     double interval = (max-min)/size;
     double tmp_min = min;
-    for( int i=0;i<size;i++){
+    for( int i=0;i<=size;i++){
         result.push_back(tmp_min);
         tmp_min+=interval;
     }
