@@ -158,6 +158,48 @@ void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle par
 
 }
 
+void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
+    double dNd3p = 0;
+    
+    // get particle's info
+    const double mass = particle.get_mass();  
+    const int baryonNumber = particle.get_b();
+    const int electricCharge = particle.get_q();
+    const int strangeness = particle.get_s();
+    
+    const int dim_spin = (2*particle.get_spin()+1); //Dimension of the spin Hilbert space: if even -> fermions, if odd -> bosons
+    int fermi_or_bose = 1; //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
+    if(dim_spin % 2){
+        fermi_or_bose *= -1;
+    }
+
+    double mT = sqrt(mass * mass + pT*pT);
+    array<double,4> p = {mT *cosh(y_rap), pT *cos(phi), pT *sin(phi), mT *sinh(y_rap)};
+    array<double,4> p_ = {mT *cosh(y_rap), -pT *cos(phi), -pT *sin(phi), -mT *sinh(y_rap)}; //lower indices    
+
+    #ifdef OPEN_MP
+        int threads_ = omp_get_max_threads() - 2; 
+        #pragma omp parallel for num_threads(threads_) reduction(+:dNd3p)
+    #endif
+    for(element cell : freeze_out_sup){ //loop over the FO hypersurface
+        double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
+
+        for (int mu = 0; mu < 4; mu++) {
+            pdSigma += p[mu] * cell.dsigma[mu];
+            pu += p[mu] * cell.u[mu] * gmumu[mu];
+        }
+        const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
+        const double distribution = (1/(pow(2*PI,3))) *1/ (exp( (pu - mutot) / cell.T) + fermi_or_bose);
+
+        dNd3p += pdSigma * distribution ;
+        
+    }
+
+    //print to file
+    fileout << "   " << pT << "   " << phi << "   " << y_rap << "   " << dNd3p/(hbarC*hbarC*hbarC) << endl; //hbarC for unit conversion
+
+}
+
 
 void shear_correction_to_spectra(double pT, double phi, double Dt, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
     //Dt is the time in fermi
