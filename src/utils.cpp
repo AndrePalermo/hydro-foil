@@ -21,3 +21,4 @@ std::vector<double> linspace(double min, double max, int size){
     }
     return result;
 }
+

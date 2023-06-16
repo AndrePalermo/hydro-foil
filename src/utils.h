@@ -18,4 +18,19 @@ const double PI = std::acos(-1);
 int levi(int i, int j, int k, int l);
 std::vector<double> linspace(double min, double max, int size);
 
+template<size_t ndim>
+class interpolation{
+    private:
+        std::array<size_t, ndim> dim;
+        std::array<double, ndim> cordinate_max, cordinate_min;
+        std::vector<double> grid_values;
+
+    public:
+        interpolation(std::array<double, ndim> cordinate_max, std::array<double, ndim> cordinate_min, std::vector<double> &grid_values);       
+        ~interpolation();
+
+        // interpolation read_grid(std::vector<double> x, std::vector<double> y, std::vector<double> z, std::vector<double> grid_values);
+        double interpolate(double x_point, double y_point, double z_point);
+}
+
 #endif
