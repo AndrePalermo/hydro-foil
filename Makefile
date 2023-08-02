@@ -14,7 +14,7 @@ TARGET = foil #Freeze-Out IntegraL
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $(OPEN_MP_FLAG)$^ -o $@
-	@echo "Compilation successful!"
+	@echo "Compilation successful! Now is time to integrate: good luck!"
 
 $(OBJECTS): | $(OBJ_DIR)
 

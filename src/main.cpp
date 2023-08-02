@@ -27,19 +27,19 @@ ofstream fout(output_file);
 		 exit(1);
 	 }
 
-int size_pt = 31;
-int size_phi = 40;
+int size_pt = 11;
+int size_phi = 20;
 int size_y = 20;
-vector<double> pT = linspace(0,6.2,size_pt);
+vector<double> pT = linspace(0,3.2,size_pt);
 vector<double> phi =  linspace(0,2*PI,size_phi);
-vector<double> y_rap =  linspace(-1,1,size_y);
+// vector<double> y_rap =  linspace(-1,1,size_y);
 
 pdg_particle lambda(3122);
 lambda.print();
-for(double iy : y_rap)
+// for(double iy : y_rap)
 	for(double ipt : pT){
 		for(double iphi : phi){
-			polarization_rapidity(ipt, iphi, iy, lambda, hypersup, fout);
+			polarization_projected(ipt, iphi, lambda, hypersup, fout);
 		}
 	}
 cout<<"The calculation is done!"<<endl;

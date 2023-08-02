@@ -12,15 +12,24 @@ using namespace std;
 
 
 //computes the mean spin vector for particles emitted at midrapidity for the particle "particle" using
-//the freezeout file "freezeout_sup" and writing the output in "fileout" as a table:
+//the freezeout file "freezeout_sup". For the thermal vorticity, eq. 64 of 2304.02276 is used
+//The output is written in "fileout" as a table:
 //pt phi denominator numerator_varpi numerator_xi
-//refer to 2009.13449
+//refer to 2103.10917
 void polarization_midrapidity(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
+//same as the previous function but uses the linear approximation for the vorticity induced polarization. This function is faster.
+void polarization_midrapidity_linear(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
+
+//Similar to "polarization_midrapidity_linear" but computes polarization projecting the gradients 
+//tangent to the hypersurface at point x before integrating  
+void polarization_projected(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
+
+//Same as "polarization_midrapidity", but the table now includes the rapidity "y":
+//pt phi y denominator numerator_varpi numerator_xi
 void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
+//integrates the thermal spectrum of "particle"
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
-
-void shear_correction_to_spectra(double pT, double phi, double Dt, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
 #endif

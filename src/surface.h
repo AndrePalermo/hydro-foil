@@ -6,13 +6,14 @@
 #include <array>
 using namespace std;
 
+//meant to read a the beta.dat file from the output of vhlle (polarization branches)
+
 struct element {
     double tau, x, y, eta;
     vector<double> u;
     vector<double> dsigma;
     double T, mub, muq, mus;
     vector<vector<double>> dbeta;
-    //std::array<std:array<double,4>,4> dbeta; 
     element() : u(4, 0), dsigma(4, 0), dbeta(4, vector<double>(4, 0)){};
     void print();
 };
