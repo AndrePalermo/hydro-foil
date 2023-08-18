@@ -32,4 +32,6 @@ void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle par
 //integrates the thermal spectrum of "particle"
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
+void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, vector<element> &freeze_out_sup, ofstream &fileout);
+
 #endif
