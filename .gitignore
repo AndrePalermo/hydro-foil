@@ -32,5 +32,6 @@
 *.app
 
 # in/out files
+*.dat
 /in
 /out
