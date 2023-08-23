@@ -3,45 +3,62 @@
 #include "utils.h"
 #include "surface.h"
 
-//TO TURN PARALLEL INTEGRATION OFF(ON) COMMENT(UN-COMMENT) THE OPEN_MP_FLAG LINE OF THE MAKEFILE
+// TO TURN PARALLEL INTEGRATION OFF(ON) COMMENT(UN-COMMENT) THE OPEN_MP_FLAG LINE OF THE MAKEFILE
 
-using namespace std;
+int main(int argc, char **argv)
+{
+	if (argc != 3)
+	{
+		std::cout << "INVALID SINTAX!"
+				  << std::endl
+				  << "use './calc <surface_file> <output_file>' to compute Lambda polarization at decoupling."
+				  << std::endl;
+		exit(1);
+	}
 
-int main(int argc, char** argv){
+	std::string surface_file = argv[1];
+	std::string output_file = argv[2];
 
-if(argc!=3){
-    cout<< "INVALID SINTAX!"<<endl;
-	cout<<"use './calc <surface_file> <output_file>' to compute Lambda polarization at decoupling."<<endl;
-	exit(1);
-}
+	std::vector<element> hypersup = {};
+	read_hypersrface(surface_file, hypersup);
 
-string surface_file = argv[1];
-string output_file = argv[2];
+	std::ofstream fout(output_file);
+	std::ofstream fout_proj(output_file + "_projected");
+	
+	if (!fout)
+	{
+		std::cout << "I/O error with " << output_file << std::endl;
+		exit(1);
+	}
+	
+	if (!fout_proj)
+	{
+		std::cout << "I/O error with " << output_file + "_projected" << std::endl;
+		exit(1);
+	}
 
-vector<element> hypersup = {};
-read_hypersrface(surface_file, hypersup);
+	int size_pt = 31;
+	int size_phi = 40;
+	int size_y = 20;
+	std::vector<double> pT = linspace(0, 6.2, size_pt);
+	std::vector<double> phi = linspace(0, 2 * PI, size_phi);
+	// std::vector<double> y_rap =  linspace(-1,1,size_y);
 
-ofstream fout(output_file);
-	 if (!fout) {
-		 cout << "I/O error with " << output_file << endl;
-		 exit(1);
-	 }
-
-int size_pt = 11;
-int size_phi = 20;
-int size_y = 20;
-vector<double> pT = linspace(0,3.2,size_pt);
-vector<double> phi =  linspace(0,2*PI,size_phi);
-vector<double> y_rap =  linspace(-1,1,size_y);
-
-pdg_particle mother_part(3224);
-mother_part.print();
-for(double iy : y_rap)
-	for(double ipt : pT){
-		for(double iphi : phi){
-			Lambda_polarization_FeedDown(ipt, iphi, iy, mother_part, hypersup, fout);
+	pdg_particle part(3122);
+	part.print();
+	// for(double iy : y_rap)
+	for (double ipt : pT)
+	{
+		for (double iphi : phi)
+		{
+			polarization_midrapidity_linear(ipt, iphi, part, hypersup, fout);
+			polarization_projected(ipt, iphi, part, hypersup, fout_proj);
 		}
 	}
-cout<<"The calculation is done!"<<endl;
-return 0;
+	std::cout << "The calculation is done!" << std::endl;
+	
+	fout.close();
+	fout_proj.close();
+	
+	return 0;
 }
