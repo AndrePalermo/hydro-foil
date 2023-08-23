@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "surface.h"
 
+#define CALC_PROJ true
 // TO TURN PARALLEL INTEGRATION OFF(ON) COMMENT(UN-COMMENT) THE OPEN_MP_FLAG LINE OF THE MAKEFILE
 
 int main(int argc, char **argv)
@@ -23,19 +24,24 @@ int main(int argc, char **argv)
 	read_hypersrface(surface_file, hypersup);
 
 	std::ofstream fout(output_file);
+
+#if CALC_PROJ
 	std::ofstream fout_proj(output_file + "_projected");
-	
+#endif
+
 	if (!fout)
 	{
 		std::cout << "I/O error with " << output_file << std::endl;
 		exit(1);
 	}
-	
+
+#if CALC_PROJ
 	if (!fout_proj)
 	{
 		std::cout << "I/O error with " << output_file + "_projected" << std::endl;
 		exit(1);
 	}
+#endif
 
 	int size_pt = 31;
 	int size_phi = 40;
@@ -52,13 +58,18 @@ int main(int argc, char **argv)
 		for (double iphi : phi)
 		{
 			polarization_midrapidity_linear(ipt, iphi, part, hypersup, fout);
+#if CALC_PROJ
 			polarization_projected(ipt, iphi, part, hypersup, fout_proj);
+#endif
 		}
 	}
 	std::cout << "The calculation is done!" << std::endl;
-	
+
 	fout.close();
+
+#if CALC_PROJ
 	fout_proj.close();
-	
+#endif
+
 	return 0;
 }
