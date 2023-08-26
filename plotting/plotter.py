@@ -80,6 +80,7 @@ if(args.file is None):
 
 non_proj_ng = args.file + '.' + args.ext
 
+
 if(not os.path.isfile(non_proj_ng)):
     print(non_proj_ng, ' does not exist.')
     exit()
@@ -102,6 +103,8 @@ plt.xticks([0,np.pi/2,np.pi],["0",r"$\pi/2$",r"$\pi$"])
 plt.yticks([0])
 plt.grid()
 
+plt.savefig(args.file+'-1.png')
+
 plt.figure(2)
 plt.plot(*Pz_polarization(non_proj_ng,vorticity=True),label=r"$\varpi$, non projected")
 
@@ -115,6 +118,7 @@ plt.xlim(0,np.pi)
 plt.xticks([0,np.pi/2,np.pi],["0",r"$\pi/2$",r"$\pi$"])
 plt.yticks([0])
 plt.grid()
+plt.savefig(args.file+'-2.png')
 
 plt.figure("3")
 plt.plot(*Pj_polarization(non_proj_ng),label=r"$\varpi+\xi$, non projected")
@@ -126,8 +130,9 @@ plt.ylabel(r"$P_j$")
 plt.legend()
 
 plt.xlim(0,np.pi/2)
-
+plt.savefig(args.file+'-3.png')
 # plt.plot(*pl.Pj_polarization(foils),label=r"foils $\varpi+\xi$")
+
 plt.figure("4")
 plt.plot(*Pj_polarization(non_proj_ng,vorticity=True),label=r"$\varpi$, non projeced")
 
@@ -139,5 +144,6 @@ plt.ylabel(r"$P_j$")
 plt.legend()
 
 plt.xlim(0,np.pi/2)
+plt.savefig(args.file+'-4.png')
 
 plt.show()
