@@ -1,5 +1,6 @@
 #This table only contains a few particles. If you need more, add them at need.
 #Particle ID(s)     Mass  (GeV)         Name                Charge    Spin    Baryon Number    Strangeness
+     22             0                   photon              0         1          0               0
      211            0.13957039          pi                  1         0          0               0
      111            0.1349768           pi0                 0         0          0               0
      221            0.547862            eta                 0         0          0               0
