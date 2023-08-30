@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	 std::cout << 100 * timelikes / freeze_out_sup.size() << "% timelike elements." << std::endl;
+	 std::cout << 100 * timelikes / hypersup.size() << "% timelike elements." << std::endl;
 
 
 	std::ofstream fout(output_file);
