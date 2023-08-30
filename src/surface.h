@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 #include <array>
+#include "util.h"
 using namespace std;
 
 // meant to read a the beta.dat file from the output of vhlle (polarization branches)
