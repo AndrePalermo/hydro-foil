@@ -81,7 +81,7 @@ double element::get_normal_size()
     {
         for (int mu = 0; mu < 4; mu++)
         {
-            normal_size += dsigma[mu] * dsigma[mu] * gmumu[mu];
+            _normal_size += dsigma[mu] * dsigma[mu] * gmumu[mu];
         }
     }
     return _normal_size;
