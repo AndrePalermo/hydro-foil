@@ -23,6 +23,18 @@ int main(int argc, char **argv)
 	std::vector<element> hypersup = {};
 	read_hypersrface(surface_file, hypersup);
 
+	int timelikes = 0;
+	for (auto el : hypersup)
+	{
+		if (el.is_timelike())
+		{
+			timelikes++;
+		}
+	}
+
+	 std::cout << 100 * timelikes / freeze_out_sup.size() << "% timelike elements." << std::endl;
+
+
 	std::ofstream fout(output_file);
 
 #if CALC_PROJ
@@ -49,7 +61,8 @@ int main(int argc, char **argv)
 	std::vector<double> pT = linspace(0, 6.2, size_pt);
 	std::vector<double> phi = linspace(0, 2 * PI, size_phi);
 	// std::vector<double> y_rap =  linspace(-1,1,size_y);
-
+	
+	
 	pdg_particle part(3122);
 	part.print();
 	// for(double iy : y_rap)
