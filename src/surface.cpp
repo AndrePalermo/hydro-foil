@@ -77,7 +77,7 @@ void element::print()
 
 double element::get_normal_size()
 {
-    if (_normal_sise == 0)
+    if (_normal_size == 0)
     {
         for (int mu = 0; mu < 4; mu++)
         {
