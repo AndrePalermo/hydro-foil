@@ -102,7 +102,7 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
    
     #ifdef OPEN_MP
         int threads_ = NTHREADS; 
-        #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear,timelikes)
+        #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear)
     #endif
     for(element cell : freeze_out_sup){ //loop over the FO hypersurface
         double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
