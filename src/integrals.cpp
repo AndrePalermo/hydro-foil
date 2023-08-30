@@ -27,8 +27,8 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
     const int strangeness = particle.get_s();
 
     double mT = sqrt(mass * mass + pT*pT);
-    array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
-    array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
+    std::array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
+    std::array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
 
     #ifdef OPEN_MP
         int threads_ = NTHREADS; 
@@ -99,7 +99,7 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
     double mT = sqrt(mass * mass + pT*pT);
     array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
     array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
-
+    int timelikes = 0;
     #ifdef OPEN_MP
         int threads_ = NTHREADS; 
         #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear)
@@ -112,6 +112,12 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
         for(int mu = 0; mu < 4; mu++){
             normal_size += cell.dsigma[mu]*cell.dsigma[mu]*gmumu[mu];
         }
+
+        if (normal_size < 0)
+        {
+            timelikes++;
+        }
+        
 
         for(int mu = 0; mu < 4; mu++){
             for(int nu = 0; nu < 4; nu++){
@@ -163,6 +169,8 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
         fileout << "   " << P_shear[mu]/ (8.0 * mass) *hbarC; //Unit conversion to make the shear adimensional 
     fileout << endl;
 
+    std::cout << 100 * timelikes / freeze_out_sup.size() << "% timelike elements." << std::endl;
+
 }
 
 void polarization_midrapidity_linear(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
@@ -177,8 +185,10 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
     const int strangeness = particle.get_s();
 
     double mT = sqrt(mass * mass + pT*pT);
-    array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
-    array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
+    std::array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
+    std::array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
+
+     
 
     #ifdef OPEN_MP
         int threads_ = NTHREADS; 
