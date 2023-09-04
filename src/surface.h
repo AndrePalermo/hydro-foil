@@ -25,10 +25,15 @@ struct element
         return get_normal_size() > 0;
     }
 
+    friend istream& operator>> (istream& stream, element& el);
+
 private:
     double _normal_size = 0;
 };
 
 void read_hypersrface(std::string filename, vector<element> &hypersurface);
+
+std::array<double, 4> get_mins(vector<element> &hypersup);
+std::array<double, 4> get_maxs(vector<element> &hypersup);
 
 #endif

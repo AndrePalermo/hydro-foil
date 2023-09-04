@@ -11,7 +11,9 @@
         "string": "cpp",
         "string_view": "cpp",
         "unordered_map": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "filesystem": "cpp",
+        "__tuple": "cpp"
     },
     "[python]": {
         "editor.defaultFormatter": "ms-python.black-formatter"

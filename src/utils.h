@@ -33,4 +33,11 @@ class interpolator{
         double trilinear_interpolation(double x, double y, double z);
 };
 
+template <typename T>
+T absolute_error(const T approx, const T exact);
+
+template <typename T>
+T relative_error(const T approx, const T exact);
+
 #endif
+
