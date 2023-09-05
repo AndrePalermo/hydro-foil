@@ -13,9 +13,11 @@ const int NTHREADS = omp_get_max_threads();
 #include "utils.h"
 #include "integrals.h"
 
+using namespace integrals;
 // for a description of the functions refer to integrals.h
 
-void polarization_midrapidity(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout)
+void polarization_midrapidity(double pT, double phi, pdg_particle particle, surface_data &freeze_out_sup,
+                              std::ofstream &fileout)
 {
     double P_vorticity[4] = {0, 0, 0, 0};
     double P_shear[4] = {0, 0, 0, 0};
@@ -35,10 +37,10 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
     int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : Denominator, P_vorticity, P_shear)
 #endif
-    for (element cell : freeze_out_sup)
+    for (surface::element cell : freeze_out_sup)
     {                                 // loop over the FO hypersurface
         double pdSigma = 0., pu = 0.; // scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
-        array<double, 4> theta_vector = {0, 0, 0, 0};
+        std::array<double, 4> theta_vector = {0, 0, 0, 0};
         double theta_sq = 0.;
 
         for (int mu = 0; mu < 4; mu++)
@@ -86,10 +88,10 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
         fileout << "   " << P_vorticity[mu];
     for (int mu = 0; mu < 4; mu++)
         fileout << "   " << P_shear[mu] * hbarC; // Unit conversion to make the shear adimensional
-    fileout << endl;
+    fileout << std::endl;
 }
 
-void polarization_projected(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout)
+void polarization_projected(double pT, double phi, pdg_particle particle, surface_data &freeze_out_sup, std::ofstream &fileout)
 {
     double P_vorticity[4] = {0, 0, 0, 0};
     double P_shear[4] = {0, 0, 0, 0};
@@ -102,14 +104,14 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
     const int strangeness = particle.get_s();
 
     double mT = sqrt(mass * mass + pT * pT);
-    array<double, 4> p = {mT, pT * cos(phi), pT * sin(phi), 0};
-    array<double, 4> p_ = {mT, -pT * cos(phi), -pT * sin(phi), 0}; // lower indices
+    std::array<double, 4> p = {mT, pT * cos(phi), pT * sin(phi), 0};
+    std::array<double, 4> p_ = {mT, -pT * cos(phi), -pT * sin(phi), 0}; // lower indices
 
 #ifdef OPEN_MP
     int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : Denominator, P_vorticity, P_shear)
 #endif
-    for (element cell : freeze_out_sup)
+    for (surface::element cell : freeze_out_sup)
     { // loop over the FO hypersurface
 #if _REOMVE_TIMELIKES_
         if (cell.is_timelike())
@@ -129,7 +131,7 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
             for (int nu = 0; nu < 4; nu++)
             {
                 // projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (normal_size); // projector with lower indices
-                 projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (cell.get_normal_size()); // projector with lower indices
+                projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (cell.get_normal_size()); // projector with lower indices
                 projected_gradient[mu][nu] = 0;
             }
         }
@@ -178,10 +180,10 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
         fileout << "   " << P_vorticity[mu] / (8.0 * mass) * hbarC; // unit conversion to make the vorticity adimensional
     for (int mu = 0; mu < 4; mu++)
         fileout << "   " << P_shear[mu] / (8.0 * mass) * hbarC; // Unit conversion to make the shear adimensional
-    fileout << endl;
+    fileout << std::endl;
 }
 
-void polarization_midrapidity_linear(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout)
+void polarization_midrapidity_linear(double pT, double phi, pdg_particle particle, surface_data &freeze_out_sup, std::ofstream &fileout)
 {
     double P_vorticity[4] = {0, 0, 0, 0};
     double P_shear[4] = {0, 0, 0, 0};
@@ -201,7 +203,7 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
     int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : Denominator, P_vorticity, P_shear)
 #endif
-    for (element cell : freeze_out_sup)
+    for (surface::element cell : freeze_out_sup)
     { // loop over the FO hypersurface
 #if _REOMVE_TIMELIKES_
         if (cell.is_timelike())
@@ -238,10 +240,10 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
         fileout << "   " << P_vorticity[mu] / (8.0 * mass) * hbarC; // unit conversion to make the vorticity adimensional
     for (int mu = 0; mu < 4; mu++)
         fileout << "   " << P_shear[mu] / (8.0 * mass) * hbarC; // Unit conversion to make the shear adimensional
-    fileout << endl;
+    fileout << std::endl;
 }
 
-void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout)
+void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle particle, surface_data &freeze_out_sup, std::ofstream &fileout)
 {
     double P_vorticity[4] = {0, 0, 0, 0};
     double P_shear[4] = {0, 0, 0, 0};
@@ -255,17 +257,17 @@ void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle par
     const int strangeness = particle.get_s();
 
     double mT = sqrt(mass * mass + pT * pT);
-    array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
-    array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
+    std::array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
+    std::array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
 
 #ifdef OPEN_MP
     int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : Denominator, P_vorticity, P_shear, P_shear_chun)
 #endif
-    for (element cell : freeze_out_sup)
+    for (surface::element cell : freeze_out_sup)
     {                                 // loop over the FO hypersurface
         double pdSigma = 0., pu = 0.; // scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
-        array<double, 4> theta_vector = {0, 0, 0, 0};
+        std::array<double, 4> theta_vector = {0, 0, 0, 0};
         double theta_sq = 0.;
 
         for (int mu = 0; mu < 4; mu++)
@@ -315,10 +317,10 @@ void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle par
         fileout << "   " << P_shear[mu] * hbarC; // Unit conversion to make the shear adimensional
     for (int mu = 0; mu < 4; mu++)
         fileout << "   " << P_shear_chun[mu] * hbarC; // Unit conversion to make the shear adimensional
-    fileout << endl;
+    fileout << std::endl;
 }
 
-void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout)
+void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, surface_data &freeze_out_sup, std::ofstream &fileout)
 {
     double dNd3p = 0;
 
@@ -336,14 +338,14 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
     }
 
     double mT = sqrt(mass * mass + pT * pT);
-    array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
-    array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
+    std::array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
+    std::array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
 
 #ifdef OPEN_MP
     int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : dNd3p)
 #endif
-    for (element cell : freeze_out_sup)
+    for (surface::element cell : freeze_out_sup)
     {                                 // loop over the FO hypersurface
         double pdSigma = 0., pu = 0.; // scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
 
@@ -359,10 +361,10 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
     }
 
     // print to file
-    fileout << "   " << pT << "   " << phi << "   " << y_rap << "   " << dNd3p / (hbarC * hbarC * hbarC) << endl; // hbarC for unit conversion
+    fileout << "   " << pT << "   " << phi << "   " << y_rap << "   " << dNd3p / (hbarC * hbarC * hbarC) << std::endl; // hbarC for unit conversion
 }
 
-void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, vector<element> &freeze_out_sup, ofstream &fileout)
+void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, surface_data &freeze_out_sup, std::ofstream &fileout)
 {
     pdg_particle lambda(3122);
 
@@ -390,17 +392,17 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     }
     else
     {
-        cout << "ERROR! The decay is not implemented yet!" << endl;
+        std::cout << "ERROR! The decay is not implemented yet!" << std::endl;
         exit(1);
     }
 
-    std::cout << "calculations for the decay: " << mother.get_name() << " to " << lambda.get_name() << " and " << second_son->get_name() << endl;
+    std::cout << "calculations for the decay: " << mother.get_name() << " to " << lambda.get_name() << " and " << second_son->get_name() << std::endl;
     double second_son_mass = second_son->get_mass();
 
     double mT = sqrt(mass * mass + pT * pT);
     // momentum of the Lambda particle in the Lab frame
-    array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
-    array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
+    std::array<double, 4> p = {mT * cosh(y_rap), pT * cos(phi), pT * sin(phi), mT * sinh(y_rap)};
+    std::array<double, 4> p_ = {mT * cosh(y_rap), -pT * cos(phi), -pT * sin(phi), -mT * sinh(y_rap)}; // lower indices
 
     // Energy and momentum of the Lambda particle in the mother's rest frame
     double E_Lambda_rest = (mother_mass * mother_mass + mass * mass - second_son_mass * second_son_mass) / (2 * mother_mass);
@@ -450,11 +452,11 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             int threads_ = NTHREADS;
 #pragma omp parallel for num_threads(threads_) reduction(+ : Denominator, polarization_mother, polarization_mother_shear)
 #endif
-            for (element cell : freeze_out_sup)
+            for (surface::element cell : freeze_out_sup)
             {                                 // loop over the FO hypersurface
                 double pdSigma = 0., pu = 0.; // scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
 
-                array<double, 4> theta_vector = {0, 0, 0, 0};
+                std::array<double, 4> theta_vector = {0, 0, 0, 0};
                 double theta_sq = 0.;
 
                 for (int mu = 0; mu < 4; mu++)
@@ -543,7 +545,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
                 }
                 break;
             default:
-                cout << "I don't know about this decay!" << endl;
+                std::cout << "I don't know about this decay!" << std::endl;
                 exit(1);
             }
 
@@ -570,5 +572,5 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
         fileout << "   " << P_vorticity[mu];
     for (int mu = 0; mu < 3; mu++)
         fileout << "   " << P_shear[mu] * hbarC; // Unit conversion to make the shear adimensional
-    fileout << endl;
+    fileout << std::endl;
 }
