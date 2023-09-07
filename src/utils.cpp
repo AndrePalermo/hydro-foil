@@ -4,7 +4,17 @@
 #include "utils.h"
 #include "particle_data_group.h"
 
-int levi(int i, int j, int k, int l)
+double utils::get_norm_sq(four_vec vec)
+{
+    double norm = 0.0;
+    for (int mu = 0; mu < 4; mu++)
+    {
+        norm += vec[mu] * vec[mu] * utils::gmumu[mu];
+    }
+    return norm;
+}
+
+int utils::levi(int i, int j, int k, int l)
 {
     // Levi-Civita symbols
     // i,j,k,l = 0...3 i.e. upper indices
@@ -14,7 +24,20 @@ int levi(int i, int j, int k, int l)
         return ((i - j) * (i - k) * (i - l) * (j - k) * (j - l) * (k - l) / 12);
 }
 
-int g(int mu, int nu)
+int utils::rand_int(int min, int max)
+{
+    static randomizer rng;
+    static bool initialized = false;
+    if (!initialized)
+    {
+        rng.seed(time(0));
+        initialized = true;
+    }
+    std::uniform_int_distribution<uint32_t> dist(0, 10);
+    return dist(rng);
+}
+
+int utils::g(int mu, int nu)
 {
     if (mu > 3 || mu < 0 || nu > 3 || nu < 0)
     {
@@ -35,7 +58,7 @@ int g(int mu, int nu)
     return 0;
 }
 
-std::vector<double> linspace(double min, double max, int size)
+std::vector<double> utils::linspace(double min, double max, int size)
 {
     // returns a vector of doubles from min to max (included), equally spaced with spacing max-min/size
     std::vector<double> result;
@@ -49,11 +72,11 @@ std::vector<double> linspace(double min, double max, int size)
     return result;
 }
 
-interpolator::interpolator(std::vector<double> x, std::vector<double> y, std::vector<double> z, std::vector<double> f) : x_(x), y_(y), z_(z), f_(f) {}
+utils::interpolator::interpolator(std::vector<double> x, std::vector<double> y, std::vector<double> z, std::vector<double> f) : x_(x), y_(y), z_(z), f_(f) {}
 
-interpolator::~interpolator() {}
+utils::interpolator::~interpolator() {}
 
-std::tuple<double, double> interpolator::adjacent_points(double x, std::vector<double> direction)
+std::tuple<double, double> utils::interpolator::adjacent_points(double x, std::vector<double> direction)
 {
     //"x" is some point that we want to locate in the vector "direction"
     // gives for x in the interval [x0,x1] returns the tuple (x0,x1). If x coincides with one of
@@ -78,7 +101,7 @@ std::tuple<double, double> interpolator::adjacent_points(double x, std::vector<d
     exit(1);
 }
 
-double interpolator::evaluate_f_lattice(double x, double y, double z)
+double utils::interpolator::evaluate_f_lattice(double x, double y, double z)
 {
     // Gives the value of f at the point x,y,z in the table. If the point is not on the table it returns an error
     // Supposedly, the sizes of the vectors x,y and z are the same (e.g. they are read as columns of a file)
@@ -93,7 +116,7 @@ double interpolator::evaluate_f_lattice(double x, double y, double z)
     exit(1);
 }
 
-double interpolator::trilinear_interpolation(double x, double y, double z)
+double utils::interpolator::trilinear_interpolation(double x, double y, double z)
 {
     // algorithm taken from https://en.wikipedia.org/wiki/Trilinear_interpolation
     auto [x0, x1] = adjacent_points(x, x_);
@@ -132,13 +155,13 @@ double interpolator::trilinear_interpolation(double x, double y, double z)
 }
 
 template <typename T>
-inline T absolute_error(const T approx, const T exact)
+inline T utils::absolute_error(const T approx, const T exact)
 {
     return abs(approx - exact);
 }
 
 template <typename T>
-T relative_error(const T approx, const T exact)
+T utils::relative_error(const T approx, const T exact)
 {
-    return absolute_error(approx, exact) / exact;
+    return utils::absolute_error(approx, exact) / exact;
 }

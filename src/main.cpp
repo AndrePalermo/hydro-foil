@@ -99,6 +99,43 @@ void examine_surface(std::string output_file, integrals::surface_data &hypersup)
 
 	std::cout << 100 * timelikes / hypersup.size() << "% timelike elements." << std::endl;
 
+	int index;
+	surface::element rnd_element = surface::get_random_point(hypersup, index);
+
+	auto comp = [rnd_element](const element &first, const element &second)
+	{
+		return first != rnd_element && 
+		abs(surface::element::distance(first, rnd_element)) < abs(surface::element::distance(second, rnd_element));
+	};
+
+	std::cout << "Selected ref point[" << index << "] = "
+			  << rnd_element.get_pos() << std::endl;
+
+	auto temp = std::min_element(hypersup.begin(), hypersup.end(),comp);
+
+	std::cout << temp->get_pos() << std::endl;
+
+	std::cout << temp->distance(rnd_element) << std::endl;
+
+	std::vector<element> same_tau;
+    std::copy_if(hypersup.begin(), hypersup.end(), std::back_inserter(same_tau), 
+    [rnd_element] (element e) { return e.tau == rnd_element.tau; });
+
+	std::cout << same_tau.size() << std::endl;
+
+	// std::array<surface::element, 4> next_elements;
+	// utils::four_vec deltas = surface::get_deltas(hypersup, rnd_element, next_elements);
+
+	
+	// 		  << "min dx =" << deltas << std::endl;
+	// std::cout << "Nearest in tau direction (ds^2=" << next_elements[0].distance(rnd_element) << ") = "
+	// 		  << next_elements[0].get_pos() << std::endl
+	// 		  << "------- in x direction (ds^2=" << next_elements[1].distance(rnd_element) << ") = "
+	// 		  << next_elements[1].get_pos() << std::endl
+	// 		  << "------- in y direction (ds^2=" << next_elements[2].distance(rnd_element) << ") = "
+	// 		  << next_elements[2].get_pos() << std::endl
+	// 		  << "------- in eta direction (ds^2=" << next_elements[3].distance(rnd_element) << ") = "
+	// 		  << next_elements[3].get_pos() << std::endl;
 	// assume a reference point x0
 	// for x0 - n * d to x0 + n * d
 	// {

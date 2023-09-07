@@ -13,7 +13,9 @@ const int NTHREADS = omp_get_max_threads();
 #include "utils.h"
 #include "integrals.h"
 
+using namespace utils;
 using namespace integrals;
+
 // for a description of the functions refer to integrals.h
 
 void polarization_midrapidity(double pT, double phi, pdg_particle particle, surface_data &freeze_out_sup,
@@ -49,9 +51,9 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, surf
                 for (int rh = 0; rh < 4; rh++)
                     for (int sg = 0; sg < 3; sg++)
                     { // sg=3 is zero because p_[3]=0. This speeds up the program
-                        theta_vector[mu] += levi(mu, nu, rh, sg) * p_[sg] * cell.dbeta[nu][rh] / (2 * mass);
+                        theta_vector[mu] += utils::levi(mu, nu, rh, sg) * p_[sg] * cell.dbeta[nu][rh] / (2 * mass);
                     }
-            theta_vector[mu] *= hbarC; // now theta is adimensional
+            theta_vector[mu] *= utils::hbarC; // now theta is adimensional
         }
 
         for (int mu = 0; mu < 4; mu++)
@@ -131,7 +133,7 @@ void polarization_projected(double pT, double phi, pdg_particle particle, surfac
             for (int nu = 0; nu < 4; nu++)
             {
                 // projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (normal_size); // projector with lower indices
-                projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (cell.get_normal_size()); // projector with lower indices
+                projector[mu][nu] = g(mu, nu) - cell.dsigma[mu] * cell.dsigma[nu] / (cell.get_normal_size_sq()); // projector with lower indices
                 projected_gradient[mu][nu] = 0;
             }
         }
