@@ -118,32 +118,46 @@ std::tuple<int, int > interpolator::adjacent_points(double x, std::vector<double
 }
 
 double interpolator::trilinear_interpolation(double x, double y, double z){
- const double dxG = (xmaxG - xminG) / (nx_grid - 1);
- const double dyG = (ymaxG - yminG) / (ny_grid - 1);
- const double detaG = (etamaxG - etaminG) / (neta_grid - 1);
- int ix = (int)((x - xminG) / dxG);
- int iy = (int)((y - yminG) / dyG);
- int ieta = (int)((z - etaminG) / detaG);
- if (ix < 0) ix = 0;
- if (iy < 0) iy = 0;
- if (ieta < 0) ieta = 0;
- if (ix > nx_grid - 2) ix = nx_grid - 2;
- if (iy > ny_grid - 2) iy = ny_grid - 2;
- if (ieta > neta_grid - 2) ieta = neta_grid - 2;
- const double xm = x - xminG - ix * dxG;
- const double ym = y - yminG - iy * dyG;
- const double etam = eta - etaminG - ieta * detaG;
- double wx[2] = {1. - xm / dxG, xm / dxG};
- double wy[2] = {1. - ym / dyG, ym / dyG};
- double weta[2] = {1. - etam / detaG, etam / detaG};
- double return_val = 0.;
- for (int jx = 0; jx < 2; jx++)
-  for (int jy = 0; jy < 2; jy++)
-   for (int jeta = 0; jeta < 2; jeta++){
-    return_val += wx[jx] * wy[jy] * weta[jeta] * ed_grid[ix + jx][iy + jy][ieta + jeta];
-  }
- return_val = std::max(return_val, 0.);
- return return_val;
+    const int  nx_grid = x_.size();
+    const int  ny_grid = y_.size();
+    const int  nz_grid = z_.size();
+    const double xmaxG= x_[nx_grid-1];
+    const double xminG= x_[0];
+
+    const double ymaxG= y_[nx_grid-1];
+    const double yminG= y_[0];
+
+    const double zmaxG= z_[nx_grid-1];
+    const double zminG= z_[0];
+
+
+    const double dxG = (xmaxG - xminG) / (nx_grid - 1);
+    const double dyG = (ymaxG - yminG) / (ny_grid - 1);
+    const double dzG = (zmaxG - zminG) / (nz_grid - 1);
+    int ix = (int)((x - xminG) / dxG);
+    int iy = (int)((y - yminG) / dyG);
+    int iz = (int)((z - zminG) / dzG);
+    if (ix < 0) ix = 0;
+    if (iy < 0) iy = 0;
+    if (iz < 0) iz = 0;
+    if (ix > nx_grid - 2) ix = nx_grid - 2;
+    if (iy > ny_grid - 2) iy = ny_grid - 2;
+    if (iz > nz_grid - 2) iz = nz_grid - 2;
+    const double xm = x - xminG - ix * dxG;
+    const double ym = y - yminG - iy * dyG;
+    const double zm = z - zminG - iz * dzG;
+    double wx[2] = {1. - xm / dxG, xm / dxG};
+    double wy[2] = {1. - ym / dyG, ym / dyG};
+    double weta[2] = {1. - zm / dzG, zm / dzG};
+    double return_val = 0.;
+    for (int jx = 0; jx < 2; jx++)
+     for (int jy = 0; jy < 2; jy++)
+      for (int jz = 0; jz < 2; jz++){
+    
+       return_val += wx[jx] * wy[jy] * weta[jz] * f_[ix + jx +nx_grid*(iy + jy +ny_grid*(iz + jz))];
+     }
+
+    return return_val;
 }
 //     //algorithm taken from https://en.wikipedia.org/wiki/Trilinear_interpolation
 //     auto [ix0,ix1] = adjacent_points(x,x_);
