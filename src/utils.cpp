@@ -202,6 +202,6 @@ double interpolator::trilinear_interpolation(double x, double y, double z){
 //     std::cout<<"coseA: "<<a0<<" "<<a1<<" "<<a2<<" "<<a3<<" "<<a4<<" "<<a5<<" "<<a6<<" "<<a7<<std::endl;
 //     std::cout<<"result:"<<a0 + a1*x + a2*y + a3*z + a4*x*y + a5*x*z + a6*y*z + a7*x*y*z<<std::endl;
 //     return a0 + a1*x + a2*y + a3*z + a4*x*y + a5*x*z + a6*y*z + a7*x*y*z;
-}
+
 
 
