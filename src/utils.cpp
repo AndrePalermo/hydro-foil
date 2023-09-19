@@ -45,52 +45,41 @@ interpolator::interpolator(std::vector<double> x, std::vector<double> y, std::ve
 
 interpolator::~interpolator(){}
 
-std::tuple<double, double> interpolator::adjacent_points(double x, std::vector<double> direction){
+std::tuple<double, double > interpolator::adjacent_points(double x, std::vector<double> direction){
     //"x" is some point that we want to locate in the vector "direction"
-    //gives for x in the interval [x0,x1] returns the tuple (x0,x1). If x coincides with one of
-    //the grid points it is displaced by an infinitesimal amount to make the algorithm work. 
-    double dummy_x = x;
-    if(dummy_x == direction[direction.size()-1]){
-        dummy_x -= 1e-8;
-    }
-    for(int i=0; i<direction.size();i++){
-        if(dummy_x > direction[i] & dummy_x < direction[i+1]){
-            return {direction[i],direction[i+1]};
-        }
-        if(dummy_x == direction[i]){
-            dummy_x += 1e-8;
-        }
-    }
-    std::cout<<"Out of bounds! ERROR"<<std::endl;
-    exit(1);
-}
+    //gives for x in the interval [x0,x1] returns the tuple (x0,x1).
 
-double interpolator::evaluate_f_lattice(double x, double y, double z){
-    //Gives the value of f at the point x,y,z in the table. If the point is not on the table it returns an error
-    //Supposedly, the sizes of the vectors x,y and z are the same (e.g. they are read as columns of a file)
-    for(int i=0; i<x_.size(); i++){
-        if(x == x_[i] & y==y_[i] & z==z_[i]){
-            return f_[i];
-        }
+    //xi = xmin+Deltax*i where Deltax = xmax-xmin/(size(x)-1)
+    // i = (xi-xmin)/Deltax= (size(x)-1)*(xi-xmin)/(xmax-xmin)
+    double xmin = direction[0];
+    double xmax = direction[std::size(direction)-1];
+    double i = (std::size(direction)-1)*(x-xmin)/(xmax-xmin);
+    int idx = floor(i);
+    if(i>std::size(direction)-1 || i < 0){
+        std::cout<<"Out of bounds! ERROR"<<std::endl;
+        exit(1);
     }
-    std::cout << "Not on the lattice!"<<std::endl;
-    exit(1);
+    if(abs(i-idx)<1e-8){
+        return {idx,idx};
+    }
+    return {idx,idx+1};
+
 }
 
 double interpolator::trilinear_interpolation(double x, double y, double z){
     //algorithm taken from https://en.wikipedia.org/wiki/Trilinear_interpolation
-    auto [x0,x1] = adjacent_points(x,x_);
-    auto [y0,y1] = adjacent_points(y,y_);
-    auto [z0,z1] = adjacent_points(z,z_);
+    auto [x0,x1,boolx] = adjacent_points(x,x_);
+    auto [y0,y1,booly] = adjacent_points(y,y_);
+    auto [z0,z1,boolz] = adjacent_points(z,z_);
 
-    double c000 = evaluate_f_lattice(x0,y0,z0);
-    double c001 = evaluate_f_lattice(x0,y0,z1);
-    double c010 = evaluate_f_lattice(x0,y1,z0);
-    double c100 = evaluate_f_lattice(x1,y0,z0);
-    double c011 = evaluate_f_lattice(x0,y1,z1);
-    double c110 = evaluate_f_lattice(x1,y1,z0);
-    double c101 = evaluate_f_lattice(x1,y0,z1);
-    double c111 = evaluate_f_lattice(x1,y1,z1);
+    double c000 = f[x0+size(x_)*y0+size(x_)*size(y_)*z0];
+    double c001 = f[x0+size(x_)*y0+size(x_)*size(y_)*z1];
+    double c010 = f[x0+size(x_)*y1+size(x_)*size(y_)*z0];
+    double c100 = f[x1+size(x_)*y0+size(x_)*size(y_)*z0];
+    double c011 = f[x0+size(x_)*y1+size(x_)*size(y_)*z1];
+    double c110 = f[x1+size(x_)*y1+size(x_)*size(y_)*z0];
+    double c101 = f[x1+size(x_)*y0+size(x_)*size(y_)*z1];
+    double c111 = f[x1+size(x_)*y1+size(x_)*size(y_)*z1];
 
     // std::cout<<c000;
     double dx = x0 - x1+1e-8;
