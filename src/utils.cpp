@@ -3,6 +3,7 @@
 #include<iostream>
 #include "utils.h"
 #include "particle_data_group.h"
+#include <algorithm.h> 
 
 
 int levi(int i, int j, int k, int l){
@@ -26,6 +27,51 @@ int g(int mu, int nu){
         }
     }
     return 0;
+}
+
+
+std::tuple<std::vector<double>,std::vector<double>,std::vector<double>,std::vector<double>> file_to_4_column(string filename)
+{
+    ifstream input_file(filename);
+    if(!input_file.is_open()){
+        cout << "Failed to open " << filename << endl;
+        exit(1);
+    }
+    std::vector<double> x_vector,y_vector,z_vector,fxyz_vector
+    string line;
+    while (getline(input_file, line)) {
+        if (line.empty() || line[0] == '#') {
+            continue; // skip empty or comment lines
+        }
+        double x,y,z,fxyz;
+        std::istringstream iss(line);
+
+        iss>>x>>y>>z>>fxyz;
+
+        x_vector.push_back(x);
+        y_vector.push_back(y);
+        z_vector.push_back(z);
+        fxyz_vector.push_back(fxyz);
+        
+    }
+
+    std::vector<double>::iterator it;
+    it = std::unique (x_vector.begin(), x_vector.end());            
+    x_vector.resize( std::distance(x_vector.begin(),it) );
+
+    it = std::unique (y_vector.begin(), y_vector.end());            
+    y_vector.resize( std::distance(y_vector.begin(),it) );
+
+    it = std::unique (z_vector.begin(), z_vector.end());            
+    z_vector.resize( std::distance(z_vector.begin(),it) );
+
+    if x_vector.size()*y_vector.size()*z_vector.size()!=fxyz_vector.size(){
+        cout << "Size miss_match " 
+    }
+
+    return {x_vector,y_vector,z_vector,fxyz_vector};
+
+
 }
 
 std::vector<double> linspace(double min, double max, int size){
