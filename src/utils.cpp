@@ -68,18 +68,18 @@ std::tuple<double, double > interpolator::adjacent_points(double x, std::vector<
 
 double interpolator::trilinear_interpolation(double x, double y, double z){
     //algorithm taken from https://en.wikipedia.org/wiki/Trilinear_interpolation
-    auto [x0,x1,boolx] = adjacent_points(x,x_);
-    auto [y0,y1,booly] = adjacent_points(y,y_);
-    auto [z0,z1,boolz] = adjacent_points(z,z_);
+    auto [x0,x1] = adjacent_points(x,x_);
+    auto [y0,y1] = adjacent_points(y,y_);
+    auto [z0,z1] = adjacent_points(z,z_);
 
-    double c000 = f[x0+size(x_)*y0+size(x_)*size(y_)*z0];
-    double c001 = f[x0+size(x_)*y0+size(x_)*size(y_)*z1];
-    double c010 = f[x0+size(x_)*y1+size(x_)*size(y_)*z0];
-    double c100 = f[x1+size(x_)*y0+size(x_)*size(y_)*z0];
-    double c011 = f[x0+size(x_)*y1+size(x_)*size(y_)*z1];
-    double c110 = f[x1+size(x_)*y1+size(x_)*size(y_)*z0];
-    double c101 = f[x1+size(x_)*y0+size(x_)*size(y_)*z1];
-    double c111 = f[x1+size(x_)*y1+size(x_)*size(y_)*z1];
+    double c000 = f_[x0+size(x_)*y0+size(x_)*size(y_)*z0];
+    double c001 = f_[x0+size(x_)*y0+size(x_)*size(y_)*z1];
+    double c010 = f_[x0+size(x_)*y1+size(x_)*size(y_)*z0];
+    double c100 = f_[x1+size(x_)*y0+size(x_)*size(y_)*z0];
+    double c011 = f_[x0+size(x_)*y1+size(x_)*size(y_)*z1];
+    double c110 = f_[x1+size(x_)*y1+size(x_)*size(y_)*z0];
+    double c101 = f_[x1+size(x_)*y0+size(x_)*size(y_)*z1];
+    double c111 = f_[x1+size(x_)*y1+size(x_)*size(y_)*z1];
 
     // std::cout<<c000;
     double dx = x0 - x1+1e-8;
