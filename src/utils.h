@@ -23,7 +23,7 @@ class interpolator{
         std::vector<double> x_, y_, z_, f_; //x,y,z vector of a table of the values x. All quantities have the same lenght
 
         double evaluate_f_lattice(double x, double y, double z);
-        std::tuple<double, double> adjacent_points(double x, std::vector<double> direction);
+        std::tuple<int, int> adjacent_points(double x, std::vector<double> direction);
 
     public:
         interpolator(std::vector<double> x, std::vector<double> y, std::vector<double> z, std::vector<double> f);

@@ -124,10 +124,10 @@ double interpolator::trilinear_interpolation(double x, double y, double z){
     const double xmaxG= x_[nx_grid-1];
     const double xminG= x_[0];
 
-    const double ymaxG= y_[nx_grid-1];
+    const double ymaxG= y_[ny_grid-1];
     const double yminG= y_[0];
 
-    const double zmaxG= z_[nx_grid-1];
+    const double zmaxG= z_[ny_grid-1];
     const double zminG= z_[0];
 
 
@@ -148,13 +148,13 @@ double interpolator::trilinear_interpolation(double x, double y, double z){
     const double zm = z - zminG - iz * dzG;
     double wx[2] = {1. - xm / dxG, xm / dxG};
     double wy[2] = {1. - ym / dyG, ym / dyG};
-    double weta[2] = {1. - zm / dzG, zm / dzG};
+    double wz[2] = {1. - zm / dzG, zm / dzG};
     double return_val = 0.;
     for (int jx = 0; jx < 2; jx++)
      for (int jy = 0; jy < 2; jy++)
       for (int jz = 0; jz < 2; jz++){
     
-       return_val += wx[jx] * wy[jy] * weta[jz] * f_[ix + jx +nx_grid*(iy + jy +ny_grid*(iz + jz))];
+       return_val += wx[jx] * wy[jy] * wz[jz] * f_[ix + jx +nx_grid*(iy + jy +ny_grid*(iz + jz))];
      }
 
     return return_val;
