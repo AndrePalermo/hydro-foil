@@ -27,7 +27,7 @@ void polarization_projected(double pT, double phi, pdg_particle particle, vector
 
 //Same as "polarization_midrapidity", but the table now includes the rapidity "y":
 //pt phi y denominator numerator_varpi numerator_xi
-void polarization_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
+void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
 //auxiliary function for any spin
 double exact_polarization(int spin, double pu, double T, double mutot, double theta_sq);
