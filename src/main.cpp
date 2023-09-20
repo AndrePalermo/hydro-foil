@@ -9,17 +9,17 @@ using namespace std;
 
 int main(int argc, char** argv){
 
-if(argc!=3){
-    cout<< "INVALID SINTAX!"<<endl;
-	cout<<"use './calc <surface_file> <output_file>' to compute Lambda polarization at decoupling."<<endl;
-	exit(1);
-}
+// if(argc!=3){
+//     cout<< "INVALID SINTAX!"<<endl;
+// 	cout<<"use './calc <surface_file> <output_file>' to compute Lambda polarization at decoupling."<<endl;
+// 	exit(1);
+// }
 
-string surface_file = argv[1];
-string output_file = argv[2];
+// string surface_file = argv[1];
+string output_file = argv[1];
 
-vector<element> hypersup = {};
-read_hypersrface(surface_file, hypersup);
+// vector<element> hypersup = {};
+// read_hypersrface(surface_file, hypersup);
 
 ofstream fout(output_file);
 	 if (!fout) {
@@ -39,7 +39,7 @@ mother_part.print();
 for(double iy : y_rap)
 	for(double ipt : pT){
 		for(double iphi : phi){
-			Lambda_polarization_FeedDown(ipt, iphi, iy, mother_part, hypersup, fout);
+			Lambda_polarization_FeedDown(ipt, iphi, iy, mother_part, "polarization_primary", fout);
 		}
 	}
 cout<<"The calculation is done!"<<endl;
