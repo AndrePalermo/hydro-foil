@@ -37,13 +37,13 @@ ofstream fout_sigmastar(table_file_sigmastar);
 
 int size_pt = 30;
 int size_phi = 60;
-int size_y = 20;
+int size_y = 40;
 vector<double> pTtable = linspace(0,6.2,size_pt);
 vector<double> phitable =  linspace(0,2*PI,size_phi);
 vector<double> y_raptable =  linspace(-2,2,size_y);
 
 pdg_particle Sigma0(3212);
-pdg_particle SigmaStar(3214); //NB: there are three sigma* decaying to lambdas
+pdg_particle SigmaStar(3224); //NB: there are three sigma* decaying to lambdas
 Sigma0.print();
 SigmaStar.print();
 for(double ipt : pTtable){
