@@ -224,7 +224,6 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
 void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
     double P_vorticity[4] = {0,0,0,0};
     double P_shear[4] = {0,0,0,0};
-    double P_shear_chun[4] = {0,0,0,0};
     double Denominator = 0;
 
     // get particle's info
@@ -232,7 +231,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     const int baryonNumber = particle.get_b();
     const int electricCharge = particle.get_q();
     const int strangeness = particle.get_s();
-    const int spin = particle.get_spin();
+    const double spin = particle.get_spin();
     const int fermi_or_bose = statistics(spin);
 
     double mT = sqrt(mass * mass + pT*pT);
@@ -241,7 +240,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
 
     #ifdef OPEN_MP
         int threads_ = NTHREADS; 
-        #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear,P_shear_chun)
+        #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear)
     #endif
     for(element cell : freeze_out_sup){ //loop over the FO hypersurface
         double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
@@ -272,7 +271,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
             // computing the vorticity induced polarization
             P_vorticity[mu] += pdSigma * distribution *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * 
-                        exact_polarization(spin, pu, cell.T, mutot, theta_sq);
+                        aux_exact_polarization(spin, pu, cell.T, mutot, sqrt(-theta_sq));
 
             // computing the shear induced polarization
             for(int rh=0; rh<4; rh++)
@@ -295,18 +294,25 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
 
 }
 
-double exact_polarization(int spin, double pu, double T, double mutot, double theta_sq){
+double aux_exact_polarization(double spin, double pu, double T, double mutot, double abs_theta){
 double num = 0;
-double den = 0;
-for(int k=-spin; k<=spin;k++){
-            num += k/(exp((pu-mutot)/T-k*theta_sq)+pow(-1,2*spin));
-            den += 1/(exp((pu-mutot)/T-k*theta_sq)+pow(-1,2*spin));
+double den = 1e-20;
+int fermi_or_bose = statistics(spin);
+for(double k=-spin; k<=spin;k++){
+            cout<<k<<endl;
+            num += k/(exp((pu-mutot)/T-k*abs_theta)+fermi_or_bose);
+            den += 1/(exp((pu-mutot)/T-k*abs_theta)+fermi_or_bose);
         }
+
+if(num/den != num/den){
+    cout<<"NaN in aux_exact_polarization!"<<endl;
+    exit(1);
+}
 
 return num/den;
 }
 
-int statistics(int spin){
+int statistics(double spin){
     int fermi_or_bose = 1; //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
     const int dim_spin = 2*spin+1;
     if(dim_spin % 2){
