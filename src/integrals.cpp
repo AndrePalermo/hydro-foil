@@ -233,6 +233,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     const int electricCharge = particle.get_q();
     const int strangeness = particle.get_s();
     const int spin = particle.get_spin();
+    const int fermi_or_bose = statistics(spin);
 
     double mT = sqrt(mass * mass + pT*pT);
     array<double,4> p = {mT *cosh(y_rap), pT *cos(phi), pT *sin(phi), mT *sinh(y_rap)};
@@ -263,22 +264,23 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
             theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
         }
         const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
-        const double nf = 1 / (exp( (pu - mutot) / cell.T) + 1.0);
+        const double distribution = 1.0 / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
 
-        Denominator += pdSigma * nf ;
+        Denominator += pdSigma * distribution ;
         
         for(int mu=0; mu<4; mu++){
             // computing the vorticity induced polarization
-            P_vorticity[mu] += pdSigma * nf *  
+            P_vorticity[mu] += pdSigma * distribution *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * 
-                        exact_polarization(spin, pu, cell.T,mutot, theta_sq);
+                        exact_polarization(spin, pu, cell.T, mutot, theta_sq);
 
             // computing the shear induced polarization
             for(int rh=0; rh<4; rh++)
                 for(int sg=0; sg<4; sg++)
                     for(int ta=0; ta<4; ta++){
-                    P_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, 0, rh, sg)* p_[sg] * p[ta] / p[0] 
-                                * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
+                    P_shear[mu] += - (spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
+                                * levi(mu, 0, rh, sg)* p_[sg] * p[ta] / p[0] 
+                                * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (2.0 * mass);
                     }
         }
     }
@@ -304,6 +306,15 @@ for(int k=-spin; k<=spin;k++){
 return num/den;
 }
 
+int statistics(int spin){
+    int fermi_or_bose = 1; //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
+    const int dim_spin = 2*spin+1;
+    if(dim_spin % 2){
+        fermi_or_bose *= -1;
+    }
+    return fermi_or_bose;
+}
+
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
     double dNd3p = 0;
     
@@ -313,12 +324,9 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
     const int electricCharge = particle.get_q();
     const int strangeness = particle.get_s();
     
-    const int dim_spin = (2*particle.get_spin()+1); //Dimension of the spin Hilbert space: if even -> fermions, if odd -> bosons
-    int fermi_or_bose = 1; //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
-    if(dim_spin % 2){
-        fermi_or_bose *= -1;
-    }
-
+    const int spin = particle.get_spin(); //Dimension of the spin Hilbert space: if even -> fermions, if odd -> bosons
+    int fermi_or_bose = statistics(spin); //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
+    
     double mT = sqrt(mass * mass + pT*pT);
     array<double,4> p = {mT *cosh(y_rap), pT *cos(phi), pT *sin(phi), mT *sinh(y_rap)};
     array<double,4> p_ = {mT *cosh(y_rap), -pT *cos(phi), -pT *sin(phi), -mT *sinh(y_rap)}; //lower indices    
@@ -396,7 +404,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
                             {interpolation_file, 10},
                             {interpolation_file, 11}};
 
-    int number_of_bins = 100;
+    int number_of_bins = 50;
     double dangle = PI/number_of_bins;
     #ifdef OPEN_MP
         int threads_ = NTHREADS;
@@ -440,51 +448,6 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             P_mother_[3] = -P_mother[3];
             P_mother_[0] = Energy_mother;
             
-
-            // #ifdef OPEN_MP
-            //     int threads_ = NTHREADS; 
-            //     #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,polarization_mother,polarization_mother_shear)
-            // #endif
-            // for(element cell : freeze_out_sup){ //loop over the FO hypersurface
-            //     double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
-
-            //     array<double,4> theta_vector = {0,0,0,0};
-            //     double theta_sq = 0.;
-                
-            //     for(int mu=0; mu<4; mu++){
-            //         for(int nu=0; nu<4; nu++)
-            //             for(int rh=0; rh<4; rh++)
-            //                 for(int sg=0; sg<4; sg++){ 
-            //                     theta_vector[mu] += levi(mu, nu, rh, sg)
-            //                             * P_mother_[sg] * cell.dbeta[nu][rh]/(2*mother_mass); 
-            //                 }
-            //         theta_vector[mu] *= hbarC; //now theta is adimensional 
-            //     }
-
-            //     for (int mu = 0; mu < 4; mu++) {
-            //         pdSigma += P_mother[mu] * cell.dsigma[mu];
-            //         pu += P_mother[mu] * cell.u[mu] * gmumu[mu];
-            //         theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
-            //     }
-            //     double mutot = cell.mub * mother_baryonCharge
-            //                             + cell.muq * mother_electricCharge + cell.mus * mother_strangeness;
-            //     double nf =  1 / (exp( (pu - mutot) / cell.T) + 1.0);
-            //     spectrum += pdSigma * nf ;
-            //     for(int mu=0; mu<4; mu++){
-            //         // computing the vorticity induced polarization
-            //         polarization_mother[mu] += 0.5*pdSigma * nf *  
-            //                     (theta_vector[mu]/sqrt(-theta_sq)) * sinh(sqrt(-theta_sq)*0.5)/
-            //                     (cosh(sqrt(-theta_sq)*0.5)+exp(-(pu - mutot)/cell.T));
-
-            //         for(int rh=0; rh<4; rh++)
-            //             for(int sg=0; sg<4; sg++) { 
-            //                 // computing the shear induced polarization
-            //                 for(int ta=0; ta<4; ta++)
-            //                 polarization_mother_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, 0, rh, sg)* P_mother_[sg] * P_mother[ta] / P_mother[0] 
-            //                             * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
-            //             }
-            //     } 
-            // }
             double pt_mom = sqrt(P_mother[1]*P_mother[1]+P_mother[2]*P_mother[2]);
             double phi_mom = atan2(P_mother[2],P_mother[1]);
             double y_mom = atanh(P_mother[3]/P_mother[0]);
@@ -543,8 +506,8 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
                 break;
                 case 3224: //Sigma* to Lambda and pion
                 for(int mu=0;mu<3;mu++){
-                    S_vect[mu] =2*rest_frame_Pi[mu] -(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[1]+rest_frame_Pi[1]*p_rest[2]+rest_frame_Pi[2]*p_rest[3]); 
-                    S_vectShear[mu] =2*rest_frame_PiShear[mu] -(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[1]+rest_frame_PiShear[1]*p_rest[2]+rest_frame_PiShear[2]*p_rest[3]); 
+                    S_vect[mu] =(2.0/5.0)*rest_frame_Pi[mu] -(1.0/5.0)*(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[1]+rest_frame_Pi[1]*p_rest[2]+rest_frame_Pi[2]*p_rest[3]); 
+                    S_vectShear[mu] =(2.0/5.0)*rest_frame_PiShear[mu] -(1.0/5.0)*(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[1]+rest_frame_PiShear[1]*p_rest[2]+rest_frame_PiShear[2]*p_rest[3]); 
                 }
                 break;
                 default:
@@ -573,7 +536,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     for(int mu=0; mu<3; mu++)
         fileout << "   " << P_vorticity[mu];
     for(int mu=0; mu<3; mu++)
-        fileout << "   " << P_shear[mu] *hbarC; //Unit conversion to make the shear adimensional 
+        fileout << "   " << P_shear[mu]; //The hbarc to make the shear adimensional is accounted for in the table
     fileout << endl;
 }
 
