@@ -299,7 +299,6 @@ double num = 0;
 double den = 1e-20;
 int fermi_or_bose = statistics(spin);
 for(double k=-spin; k<=spin;k++){
-            cout<<k<<endl;
             num += k/(exp((pu-mutot)/T-k*abs_theta)+fermi_or_bose);
             den += 1/(exp((pu-mutot)/T-k*abs_theta)+fermi_or_bose);
         }
@@ -410,7 +409,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
                             {interpolation_file, 10},
                             {interpolation_file, 11}};
 
-    int number_of_bins = 50;
+    int number_of_bins = 20;
     double dangle = PI/number_of_bins;
     #ifdef OPEN_MP
         int threads_ = NTHREADS;
