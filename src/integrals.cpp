@@ -454,7 +454,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             P_mother_[0] = Energy_mother;
             
             double pt_mom = sqrt(P_mother[1]*P_mother[1]+P_mother[2]*P_mother[2]);
-            double phi_mom = atan2(P_mother[2],P_mother[1]);
+            double phi_mom = atan2(P_mother[2],P_mother[1])+PI; //azimuthal angle of the mother [0,2\pi]
             double y_mom = atanh(P_mother[3]/P_mother[0]);
 
             spectrum = spectrum_interpolator.trilinear_interpolation(pt_mom, phi_mom, y_mom);
