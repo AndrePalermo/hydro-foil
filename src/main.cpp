@@ -21,39 +21,45 @@ string output_string = argv[2];
 vector<element> hypersup = {};
 read_hypersrface(surface_file, hypersup);
 
+ofstream fout(output_string);
+	 if (!fout) {
+		 cout << "I/O error with " << output_string << endl;
+		 exit(1);
+	 }
+
 string table_file_sigma0 = output_string + "_TableSigma0";
 string table_file_sigmastar = output_string + "_TableSigmastar";
-ofstream fout_sigma0(table_file_sigma0);
-	 if (!fout_sigma0) {
-		 cout << "I/O error with " << table_file_sigma0 << endl;
-		 exit(1);
-	 }
-ofstream fout_sigmastar(table_file_sigmastar);
-	 if (!fout_sigmastar) {
-		 cout << "I/O error with " << table_file_sigmastar << endl;
-		 exit(1);
-	 }
+// ofstream fout_sigma0(table_file_sigma0);
+// 	 if (!fout_sigma0) {
+// 		 cout << "I/O error with " << table_file_sigma0 << endl;
+// 		 exit(1);
+// 	 }
+// ofstream fout_sigmastar(table_file_sigmastar);
+// 	 if (!fout_sigmastar) {
+// 		 cout << "I/O error with " << table_file_sigmastar << endl;
+// 		 exit(1);
+// 	 }
 
 
-int size_pt = 30;
-int size_phi = 60;
-int size_y = 40;
-vector<double> pTtable = linspace(0,6.2,size_pt);
-vector<double> phitable =  linspace(0,2*PI,size_phi);
-vector<double> y_raptable =  linspace(-2,2,size_y);
+int size_pt = 21;
+int size_phi = 40;
+int size_y = 20;
+// vector<double> pTtable = linspace(0,6.2,size_pt);
+// vector<double> phitable =  linspace(0,2*PI,size_phi);
+// vector<double> y_raptable =  linspace(-1,1,size_y);
 
 pdg_particle Sigma0(3212);
 pdg_particle SigmaStar(3224); //NB: there are three sigma* decaying to lambdas
 Sigma0.print();
 SigmaStar.print();
-for(double ipt : pTtable){
-	for(double iphi : phitable){
-		for(double iy : y_raptable){
-			polarization_exact_rapidity(ipt, iphi, iy, Sigma0, hypersup, fout_sigma0);
-			polarization_exact_rapidity(ipt, iphi, iy, SigmaStar, hypersup, fout_sigmastar);
-		}
-	}
-}
+// for(double ipt : pTtable){
+// 	for(double iphi : phitable){
+// 		for(double iy : y_raptable){
+// 			polarization_exact_rapidity(ipt, iphi, iy, Lambda, hypersup, fout);
+// 			// polarization_exact_rapidity(ipt, iphi, iy, SigmaStar, hypersup, fout_sigmastar);
+// 		}
+// 	}
+// }
 
 string FD_file_sigma0 = output_string + "_FeedDown_Sigma0";
 string FD_file_sigmastar = output_string + "_FeedDown_Sigmastar";
@@ -74,9 +80,9 @@ size_y = 20;
 vector<double> pT = linspace(0,6.2,size_pt);
 vector<double> phi =  linspace(0,2*PI,size_phi);
 vector<double> y_rap =  linspace(-1,1,size_y);
-for(double ipt : pTtable){
-	for(double iphi : phitable){
-		for(double iy : y_raptable){
+for(double ipt : pT){
+	for(double iphi : phi){
+		for(double iy : y_rap){
 			Lambda_polarization_FeedDown(ipt, iphi, iy, Sigma0, table_file_sigma0, FDoutsigma0);
 			Lambda_polarization_FeedDown(ipt, iphi, iy, SigmaStar, table_file_sigmastar, FDoutsigmastar);
 		}

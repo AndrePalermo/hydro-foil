@@ -362,11 +362,11 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, std::string interpolation_file, ofstream &fileout){
     pdg_particle lambda(3122);
 
-    double P_vorticity[4] = {0,0,0,0};
-    double P_shear[4] = {0,0,0,0};
-    double Denominator = 0;
+    double P_vorticity[3] = {0,0,0};
+    double P_shear[3] = {0,0,0};
+    double Denominator = 1e-20;
     
-	const double mass = lambda.get_mass(); 
+	const double lambda_mass = lambda.get_mass(); 
 	
 	//fetch information concerning mother and second son
 	const double mother_mass = mother.get_mass();  
@@ -390,14 +390,14 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     // std::cout<<"Calculations for the decay: "<< mother.get_name()<< " to "<< lambda.get_name() << " and "<< second_son->get_name()<<endl;
     double second_son_mass = second_son->get_mass();
 
-    double mT = sqrt(mass * mass + pT*pT);
+    double mT = sqrt(lambda_mass * lambda_mass + pT*pT);
     //momentum of the Lambda particle in the Lab frame
     array<double,4> p = {mT *cosh(y_rap), pT *cos(phi), pT *sin(phi), mT *sinh(y_rap)};
     array<double,4> p_ = {mT *cosh(y_rap), -pT *cos(phi), -pT *sin(phi), -mT *sinh(y_rap)}; //lower indices  
 
     //Energy and momentum of the Lambda particle in the mother's rest frame
-    double E_Lambda_rest = (mother_mass*mother_mass + mass*mass - second_son_mass*second_son_mass)/(2*mother_mass); 
-    double p_rest_abs = sqrt(E_Lambda_rest*E_Lambda_rest - mass*mass);
+    double E_Lambda_rest = (mother_mass*mother_mass + lambda_mass*lambda_mass - second_son_mass*second_son_mass)/(2*mother_mass); 
+    double p_rest_abs = sqrt(E_Lambda_rest*E_Lambda_rest - lambda_mass*lambda_mass);
 
     interpolator spectrum_interpolator(interpolation_file,3);
     interpolator S_vorticity_interpolator[4]{{interpolation_file,4},
@@ -417,7 +417,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     #endif
     for(int itheta=0; itheta<number_of_bins; itheta++){
         double dtheta = itheta*dangle;
-        double integralphi_den = 0;
+        double integralphi_den = 1e-20;
         double integralphi_num[3] = {0,0,0}; 
         double integralphi_numShear[3] = {0,0,0}; 
         for(double dphi=0; dphi<2*PI-1e-5; dphi+=dangle){
@@ -425,26 +425,26 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             double rest_frame_PiShear[3] = {0,0,0}; //polarization in the rest frame of the mother, shear contribution
             double S_vect[3]={0,0,0};//the particular vector depending on the decay. For details 1905.03123
             double S_vectShear[3]={0,0,0};//the particular vector depending on the decay, shear contribution
-            double spectrum = 0;
+            double spectrum = 1e-20;
             double polarization_mother[4]={0,0,0,0};
             double polarization_mother_shear[4]={0,0,0,0};
     
-            double p_rest[4] = {0,p_rest_abs*sin(dtheta)*cos(dphi),p_rest_abs*sin(dtheta)*sin(dphi),p_rest_abs*cos(dtheta)};
+            double p_rest[3] = {p_rest_abs*sin(dtheta)*cos(dphi),p_rest_abs*sin(dtheta)*sin(dphi),p_rest_abs*cos(dtheta)}; //spatial momentum of \Lambda in mother rest frame. p^0 is irrelevant to the calculation
             //jacobian from eq. 30 of 1905.03123
             double jacobian = pow(mother_mass,3)*pow(p[0] + E_Lambda_rest,2)*
-                                (pow(p[0] + E_Lambda_rest,2)-(mass*mass+p[0]*E_Lambda_rest+p[1]*p_rest[1]+p[2]*p_rest[2]+p[3]*p_rest[3]))/
-                                (E_Lambda_rest*pow(mass*mass+p[0]*E_Lambda_rest+p[1]*p_rest[1]+p[2]*p_rest[2]+p[3]*p_rest[3],3));
+                                (pow(p[0] + E_Lambda_rest,2)-(lambda_mass*lambda_mass+p[0]*E_Lambda_rest+p[1]*p_rest[0]+p[2]*p_rest[1]+p[3]*p_rest[2]))/
+                                (E_Lambda_rest*pow(lambda_mass*lambda_mass+p[0]*E_Lambda_rest+p[1]*p_rest[0]+p[2]*p_rest[1]+p[3]*p_rest[2],3));
             //momentum of the mother
             double Energy_mother;
             double P_mother[4];
             double P_mother_[4];
             //upper indices
-            P_mother[1] = (p[1]-p_rest[1])*2*mother_mass*(p[0] + E_Lambda_rest)/
-                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[1],2)-pow(p[2]-p_rest[2],2)-pow(p[3]-p_rest[3],2));
-            P_mother[2] = (p[2]-p_rest[2])*2*mother_mass*(p[0] + E_Lambda_rest)/
-                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[1],2)-pow(p[2]-p_rest[2],2)-pow(p[3]-p_rest[3],2));
-            P_mother[3] = (p[3]-p_rest[3])*2*mother_mass*(p[0] + E_Lambda_rest)/
-                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[1],2)-pow(p[2]-p_rest[2],2)-pow(p[3]-p_rest[3],2));
+            P_mother[1] = (p[1]-p_rest[0])*2*mother_mass*(p[0] + E_Lambda_rest)/
+                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[0],2)-pow(p[2]-p_rest[1],2)-pow(p[3]-p_rest[2],2));
+            P_mother[2] = (p[2]-p_rest[1])*2*mother_mass*(p[0] + E_Lambda_rest)/
+                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[0],2)-pow(p[2]-p_rest[1],2)-pow(p[3]-p_rest[2],2));
+            P_mother[3] = (p[3]-p_rest[2])*2*mother_mass*(p[0] + E_Lambda_rest)/
+                        (pow(p[0] + E_Lambda_rest,2)-pow(p[1]-p_rest[0],2)-pow(p[2]-p_rest[1],2)-pow(p[3]-p_rest[2],2));
             Energy_mother = sqrt(mother_mass*mother_mass+pow(P_mother[1],2)+pow(P_mother[2],2)+pow(P_mother[3],2));
             P_mother[0] = Energy_mother; 
             //lower indices
@@ -505,14 +505,14 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             switch(mother.get_id()){
                 case 3212: //Sigma0 to Lambda and photon
                 for(int mu=0;mu<3;mu++){ 
-                    S_vect[mu] = -(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[1]+rest_frame_Pi[1]*p_rest[2]+rest_frame_Pi[2]*p_rest[3]); 
-                    S_vectShear[mu] = -(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[1]+rest_frame_PiShear[1]*p_rest[2]+rest_frame_PiShear[2]*p_rest[3]); 
+                    S_vect[mu] = -(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[0]+rest_frame_Pi[1]*p_rest[1]+rest_frame_Pi[2]*p_rest[2]); 
+                    S_vectShear[mu] = -(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[0]+rest_frame_PiShear[1]*p_rest[1]+rest_frame_PiShear[2]*p_rest[2]); 
                 }
                 break;
                 case 3224: //Sigma* to Lambda and pion
                 for(int mu=0;mu<3;mu++){
-                    S_vect[mu] =(2.0/5.0)*rest_frame_Pi[mu] -(1.0/5.0)*(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[1]+rest_frame_Pi[1]*p_rest[2]+rest_frame_Pi[2]*p_rest[3]); 
-                    S_vectShear[mu] =(2.0/5.0)*rest_frame_PiShear[mu] -(1.0/5.0)*(p_rest[mu+1]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[1]+rest_frame_PiShear[1]*p_rest[2]+rest_frame_PiShear[2]*p_rest[3]); 
+                    S_vect[mu] = (2.0/5.0)*rest_frame_Pi[mu] -(1.0/5.0)*(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[0]+rest_frame_Pi[1]*p_rest[1]+rest_frame_Pi[2]*p_rest[2]); 
+                    S_vectShear[mu] = (2.0/5.0)*rest_frame_PiShear[mu] -(1.0/5.0)*(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[0]+rest_frame_PiShear[1]*p_rest[1]+rest_frame_PiShear[2]*p_rest[2]); 
                 }
                 break;
                 default:
@@ -521,10 +521,10 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             }
             
             //compute integrals in phi  
-            integralphi_den += dangle*spectrum*jacobian/P_mother[0];
+            integralphi_den += dangle*spectrum*jacobian;
             for(int mu=0;mu<3;mu++){
-                integralphi_num[mu] += dangle*jacobian*S_vect[mu]/P_mother[0];
-                integralphi_numShear[mu] += dangle*jacobian*S_vectShear[mu]/P_mother[0];
+                integralphi_num[mu] += dangle*jacobian*S_vect[mu]; //the spectrum is not present because it simplify with the denominator in the polarization formula
+                integralphi_numShear[mu] += dangle*jacobian*S_vectShear[mu];
             }
         } //end loop in iph
         //compute integral in theta
@@ -543,5 +543,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     for(int mu=0; mu<3; mu++)
         fileout << "   " << P_shear[mu]; //The hbarc to make the shear adimensional is accounted for in the table
     fileout << endl;
+
+    delete second_son;
 }
 
