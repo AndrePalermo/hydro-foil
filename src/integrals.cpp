@@ -312,12 +312,18 @@ return num/den;
 }
 
 int statistics(double spin){
-    int fermi_or_bose = 1; //the factor to add in the denominator of the distribution: 1 Fermi-Dirac, -1 Bose-Einstein
-    const int dim_spin = 2*spin+1;
-    if(dim_spin % 2){
-        fermi_or_bose *= -1;
+    //returns 1 if Fermi, -1 if Bose statistics
+    const double dim_spin = 2*spin+1;
+    if(dim_spin != (int) dim_spin){
+        exit(1);
     }
-    return fermi_or_bose;
+    if((int)dim_spin % 2 == 0){
+        return 1;
+    }
+    else if((int)dim_spin % 2 == 1){
+        return -1;
+    }
+    return 0;
 }
 
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
