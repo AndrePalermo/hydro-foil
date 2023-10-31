@@ -263,7 +263,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
             theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
         }
         const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
-        const double distribution = 1.0 / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
+        const double distribution = ((2*spin +1)/pow( 2*hbarC*PI, 3.0)) / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
 
         Denominator += pdSigma * distribution ;
         
