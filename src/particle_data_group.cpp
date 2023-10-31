@@ -5,14 +5,16 @@
 
 #include "particle_data_group.h"
 
-#define path_to_database "pdg_database/baryons_mesons.txt"
+//PDG_PATH is defined at compile time to be the absolute
+// path to "pdg_database/baryons_mesons.txt"
 
 using namespace std;
 
 pdg_particle::pdg_particle(int id_number){
-    ifstream input_file(path_to_database);
+    string path = PDG_PATH;
+    ifstream input_file(path);
     if(!input_file.is_open()){
-        cout << "Failed to PDG database at " << path_to_database << endl;;
+        cout << "Failed to read PDG database at " << path << endl;;
         exit(1);
     }
     
@@ -50,7 +52,7 @@ pdg_particle::pdg_particle(int id_number){
             return ;
         }
     }
-    cout << "ERROR: No particle with PDG " << id_number << " is known. Check the id given or add it to the database at " << path_to_database << endl;
+    cout << "ERROR: No particle with PDG " << id_number << " is known. Check the id given or add it to the database at " << path << endl;
     exit(1);        
 }
 
