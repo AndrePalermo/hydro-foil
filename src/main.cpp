@@ -16,8 +16,10 @@ if(argc<3){
 	cout<<"use './foil <surface_file> <output_folder> <flags>' to compute Lambda polarization at decoupling."<<endl;
 	exit(1);
 }
-if(argc = 4 && argv[3]=="-D"){
+cout<< argv[3]<<endl;
+if(argv[3]=="-D"s){
 	decay = true;
+	cout<<"Including calculations for the feed-down corrections!"<<endl;
 }
 
 string surface_file = argv[1];
