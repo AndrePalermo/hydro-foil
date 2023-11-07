@@ -16,7 +16,7 @@ if(argc<3){
 	cout<<"use './foil <surface_file> <output_folder> <flags>' to compute Lambda polarization at decoupling."<<endl;
 	exit(1);
 }
-cout<< argv[3]<<endl;
+
 if(argv[3]=="-D"s){
 	decay = true;
 	cout<<"Including calculations for the feed-down corrections!"<<endl;
@@ -68,13 +68,16 @@ if(decay){
 			exit(1);
 		}
 
+	vector<double> pT_table = linspace(0,6.2,2*size_pt);
+	vector<double> phi_table =  linspace(0,2*PI,2*size_phi);
+	vector<double> y_rap_table =  linspace(-1,1,2*size_y);
 	pdg_particle Sigma0(3212);
 	pdg_particle SigmaStar(3224); //NB: there are three sigma* decaying to lambdas
 	Sigma0.print();
 	SigmaStar.print();
-	for(double ipt : pT){
-		for(double iphi : phi){
-			for(double iy : y_rap){
+	for(double ipt : pT_table){
+		for(double iphi : phi_table){
+			for(double iy : y_rap_table){
 				polarization_exact_rapidity(ipt, iphi, iy, Sigma0, hypersup, fout_sigma0);
 				polarization_exact_rapidity(ipt, iphi, iy, SigmaStar, hypersup, fout_sigmastar);
 			}
