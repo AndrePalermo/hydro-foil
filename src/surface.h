@@ -12,7 +12,7 @@ struct element {
     double tau, x, y, eta;
     vector<double> u;
     vector<double> dsigma;
-    double T, mub, muq, mus;
+    double T, mub, muq, mus; //GeV
     vector<vector<double>> dbeta;
     element() : u(4, 0), dsigma(4, 0), dbeta(4, vector<double>(4, 0)){};
     void print();
