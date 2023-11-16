@@ -233,6 +233,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     const int strangeness = particle.get_s();
     const double spin = particle.get_spin();
     const int fermi_or_bose = statistics(spin);
+    const double phase_space = ((2*spin +1)/pow( 2*hbarC*PI, 3.0));
 
     double mT = sqrt(mass * mass + pT*pT);
     array<double,4> p = {mT *cosh(y_rap), pT *cos(phi), pT *sin(phi), mT *sinh(y_rap)};
@@ -257,29 +258,30 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
            theta_vector[mu] *= hbarC; //now theta is adimensional 
         }
 
-        for (int mu = 0; mu < 4; mu++) {
+        for (int mu = 0; mu < 4; mu++){
             pdSigma += p[mu] * cell.dsigma[mu];
             pu += p[mu] * cell.u[mu] * gmumu[mu];
             theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
         }
         const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
-        const double distribution = ((2*spin +1)/pow( 2*hbarC*PI, 3.0)) / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
+        const double distribution = 1 / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
 
-        Denominator += pdSigma * distribution ;
+        Denominator += phase_space*pdSigma * distribution ;
         
         for(int mu=0; mu<4; mu++){
             // computing the vorticity induced polarization
-            P_vorticity[mu] += pdSigma * distribution *  
+            P_vorticity[mu] += phase_space*pdSigma * distribution *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * 
                         aux_exact_polarization(spin, pu, cell.T, mutot, sqrt(-theta_sq));
 
             // computing the shear induced polarization
-            for(int rh=0; rh<4; rh++)
-                for(int sg=0; sg<4; sg++)
-                    for(int ta=0; ta<4; ta++){
-                    P_shear[mu] += - (spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
-                                * levi(mu, 0, rh, sg)* p_[sg] * p[ta] / p[0] 
-                                * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (2.0 * mass);
+            for(int sg=0; sg<4; sg++)
+                for(int ta=0; ta<4; ta++)
+                    for(int rh=0; rh<4; rh++){
+                    P_shear[mu] += - phase_space*(spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
+                                * levi(mu, 0, sg, ta)* (p_[ta]/mass) * (p[rh]/p[0]) 
+                                *hbarC*( cell.dbeta[sg][rh] + cell.dbeta[rh][sg])/ 2.0;
+                                //hbarC: unit conversion to make the shear adimensional 
                     }
         }
     }
@@ -289,7 +291,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     for(int mu=0; mu<4; mu++)
         fileout << "   " << P_vorticity[mu];
     for(int mu=0; mu<4; mu++)
-        fileout << "   " << P_shear[mu] *hbarC; //Unit conversion to make the shear adimensional 
+        fileout << "   " << P_shear[mu]; 
     fileout << endl;
 
 }
@@ -365,7 +367,8 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 
 }
 
-void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, std::string interpolation_file, ofstream &fileout){
+void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, 
+    interpolator &spectrum_interpolator, array<interpolator,4> &S_vorticity_interpolator, array<interpolator,4> &S_shear_interpolator, ofstream &fileout){
     pdg_particle lambda(3122);
 
     double P_vorticity[3] = {0,0,0};
@@ -393,7 +396,6 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
         exit(1);
     }
 
-    // std::cout<<"Calculations for the decay: "<< mother.get_name()<< " to "<< lambda.get_name() << " and "<< second_son->get_name()<<endl;
     double second_son_mass = second_son->get_mass();
 
     double mT = sqrt(lambda_mass * lambda_mass + pT*pT);
@@ -405,17 +407,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
     double E_Lambda_rest = (mother_mass*mother_mass + lambda_mass*lambda_mass - second_son_mass*second_son_mass)/(2*mother_mass); 
     double p_rest_abs = sqrt(E_Lambda_rest*E_Lambda_rest - lambda_mass*lambda_mass);
 
-    interpolator spectrum_interpolator(interpolation_file,3);
-    interpolator S_vorticity_interpolator[4]{{interpolation_file,4},
-                                {interpolation_file,5},
-                                {interpolation_file,6},
-                                {interpolation_file,7}};
-    interpolator S_shear_interpolator[4]{{interpolation_file, 8},
-                            {interpolation_file, 9},
-                            {interpolation_file, 10},
-                            {interpolation_file, 11}};
-
-    int number_of_bins = 20;
+    int number_of_bins = 30;
     double dangle = PI/number_of_bins;
     #ifdef OPEN_MP
         int threads_ = NTHREADS;

@@ -38,6 +38,7 @@ int statistics(double spin);
 //integrates the thermal spectrum of "particle"
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
-void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, std::string interpolation_file, ofstream &fileout);
+void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, 
+    interpolator &spectrum_interpolator, array<interpolator,4> &S_vorticity_interpolator, array<interpolator,4> &S_shear_interpolator, ofstream &fileout);
 
 #endif

@@ -97,11 +97,33 @@ if(decay){
 			exit(1);
 		}
 
+	interpolator spectrum_interpolatorS0(table_file_sigma0,3);
+    array<interpolator,4> S_vorticity_interpolatorS0{ {{table_file_sigma0,4},
+                                {table_file_sigma0,5},
+                                {table_file_sigma0,6},
+                                {table_file_sigma0,7}} };
+    array<interpolator,4> S_shear_interpolatorS0{ {{table_file_sigma0, 8},
+                            {table_file_sigma0, 9},
+                            {table_file_sigma0, 10},
+                            {table_file_sigma0, 11}} };
+
+	interpolator spectrum_interpolatorSs(table_file_sigmastar,3);
+    array<interpolator,4> S_vorticity_interpolatorSs{ {{table_file_sigmastar,4},
+                                {table_file_sigmastar,5},
+                                {table_file_sigmastar,6},
+                                {table_file_sigmastar,7}} };
+    array<interpolator,4> S_shear_interpolatorSs{ {{table_file_sigmastar, 8},
+                            {table_file_sigmastar, 9},
+                            {table_file_sigmastar, 10},
+                            {table_file_sigmastar, 11}} };
+
 	for(double ipt : pT){
 		for(double iphi : phi){
 			for(double iy : y_rap){
-				Lambda_polarization_FeedDown(ipt, iphi, iy, Sigma0, table_file_sigma0, FDoutsigma0);
-				Lambda_polarization_FeedDown(ipt, iphi, iy, SigmaStar, table_file_sigmastar, FDoutsigmastar);
+				Lambda_polarization_FeedDown(ipt, iphi, iy, Sigma0, 
+						spectrum_interpolatorS0, S_vorticity_interpolatorS0, S_shear_interpolatorS0, FDoutsigma0);
+				Lambda_polarization_FeedDown(ipt, iphi, iy, SigmaStar, 
+						spectrum_interpolatorSs, S_vorticity_interpolatorSs, S_shear_interpolatorSs, FDoutsigmastar);
 			}
 		}
 	}
