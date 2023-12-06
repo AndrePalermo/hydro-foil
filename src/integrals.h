@@ -41,4 +41,7 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, 
     interpolator &spectrum_interpolator, array<interpolator,4> &S_vorticity_interpolator, array<interpolator,4> &S_shear_interpolator, ofstream &fileout);
 
+void Lambda_FeedDown_nointerpolation(double pT, double phi, double y_rap, pdg_particle mother, 
+    vector<element> &freeze_out_sup, ofstream &fileout);
+
 #endif
