@@ -712,13 +712,13 @@ void Lambda_FeedDown_nointerpolation(double pT, double phi, double y_rap, pdg_pa
             switch(mother.get_id()){
                 case 3212: //Sigma0 to Lambda and photon
                 for(int mu=0;mu<3;mu++){ 
-                    S_vect[mu] = -(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[0]+rest_frame_Pi[1]*p_rest[1]+rest_frame_Pi[2]*p_rest[2]); 
+                    S_vect[mu] =      -(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]     *p_rest[0]+rest_frame_Pi[1]     *p_rest[1]+rest_frame_Pi[2]     *p_rest[2]); 
                     S_vectShear[mu] = -(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[0]+rest_frame_PiShear[1]*p_rest[1]+rest_frame_PiShear[2]*p_rest[2]); 
                 }
                 break;
                 case 3224: //Sigma* to Lambda and pion
                 for(int mu=0;mu<3;mu++){
-                    S_vect[mu] = (2.0/5.0)*rest_frame_Pi[mu] -(1.0/5.0)*(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]*p_rest[0]+rest_frame_Pi[1]*p_rest[1]+rest_frame_Pi[2]*p_rest[2]); 
+                    S_vect[mu]      = (2.0/5.0)*rest_frame_Pi[mu]      -(1.0/5.0)*(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_Pi[0]     *p_rest[0]+rest_frame_Pi[1]     *p_rest[1]+rest_frame_Pi[2]     *p_rest[2]); 
                     S_vectShear[mu] = (2.0/5.0)*rest_frame_PiShear[mu] -(1.0/5.0)*(p_rest[mu]/pow(p_rest_abs,2))*(rest_frame_PiShear[0]*p_rest[0]+rest_frame_PiShear[1]*p_rest[1]+rest_frame_PiShear[2]*p_rest[2]); 
                 }
                 break;
