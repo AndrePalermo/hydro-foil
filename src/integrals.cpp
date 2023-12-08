@@ -452,7 +452,10 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             P_mother_[0] = Energy_mother;
             
             double pt_mom = sqrt(P_mother[1]*P_mother[1]+P_mother[2]*P_mother[2]);
-            double phi_mom = atan2(P_mother[2],P_mother[1])+PI; //azimuthal angle of the mother [0,2\pi]
+            double phi_mom = atan2(P_mother[2],P_mother[1]); //azimuthal angle of the mother [0,2\pi]
+            if(phi_mom<0){
+                phi_mom += 2*PI;
+            }
             double y_mom = atanh(P_mother[3]/P_mother[0]);
 
             spectrum = spectrum_interpolator.trilinear_interpol(pt_mom, phi_mom, y_mom);
@@ -467,7 +470,7 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             polarization_mother_shear[1] = S_shear_interpolator[1].trilinear_interpol(pt_mom, phi_mom, y_mom);
             polarization_mother_shear[2] = S_shear_interpolator[2].trilinear_interpol(pt_mom, phi_mom, y_mom);
             polarization_mother_shear[3] = S_shear_interpolator[3].trilinear_interpol(pt_mom, phi_mom, y_mom);
-            
+
             //boost to the rest frame of the mother: the inverse standard boost is given by {{e/m, -(px/m), -(py/m), -(pz/m)}, {-(px/m), 1 + px^2/(e m + m^2), (px py)/(e m + m^2), (px pz)/(e m + m^2)}, {-(py/m), (px py)/(e m + m^2), 1 + py^2/(e m + m^2), (py pz)/(e m + m^2)}, {-(pz/m), (px pz)/(e m + m^2), (py pz)/(e m + m^2), 1 + pz^2/(e m + m^2)}}
             rest_frame_Pi[0] = -((polarization_mother[0]*P_mother[1])/mother_mass) + 
                     polarization_mother[1]*(1 + pow(P_mother[1],2)/(P_mother[0]*mother_mass + pow(mother_mass,2))) + 
@@ -675,7 +678,6 @@ void Lambda_FeedDown_nointerpolation(double pT, double phi, double y_rap, pdg_pa
                             }
                 }
             }
-
             
             //boost to the rest frame of the mother: the inverse standard boost is given by {{e/m, -(px/m), -(py/m), -(pz/m)}, {-(px/m), 1 + px^2/(e m + m^2), (px py)/(e m + m^2), (px pz)/(e m + m^2)}, {-(py/m), (px py)/(e m + m^2), 1 + py^2/(e m + m^2), (py pz)/(e m + m^2)}, {-(pz/m), (px pz)/(e m + m^2), (py pz)/(e m + m^2), 1 + pz^2/(e m + m^2)}}
             rest_frame_Pi[0] = -((polarization_mother[0]*P_mother[1])/mother_mass) + 
