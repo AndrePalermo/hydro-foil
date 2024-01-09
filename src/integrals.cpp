@@ -367,14 +367,29 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 
 }
 
-void polarization_components(double pT, double phi, double y_rap, pdg_particle particle, std::array<vector<element>,5> components, std::array<ofstream,5> fileout_list){
+void polarization_components(pdg_particle particle, std::array<vector<element>,5> components, std::array<string,5> fileout_list){
+    int size_pt = 20;
+    int size_phi = 30;
+    int size_y = 20;
+    std::vector<double> pT = linspace(0,6.2,size_pt);
+    std::vector<double> phi =  linspace(0,2*PI,size_phi);
+    std::vector<double> y_rap =  linspace(-1,1,size_y);
 
-    polarization_exact_rapidity(pT, phi, y_rap, particle, components[0], fileout_list[0]);
-    polarization_exact_rapidity(pT, phi, y_rap, particle, components[1], fileout_list[1]);
-    polarization_exact_rapidity(pT, phi, y_rap, particle, components[2], fileout_list[2]);
-    polarization_exact_rapidity(pT, phi, y_rap, particle, components[3], fileout_list[3]);
-    polarization_exact_rapidity(pT, phi, y_rap, particle, components[4], fileout_list[4]);
-    
+    ofstream fout0(fileout_list[0]),fout1(fileout_list[1]),fout2(fileout_list[2]),
+	fout3(fileout_list[3]),fout4(fileout_list[4]);
+
+	for(double ipt : pT){
+		for(double iphi : phi){
+			for(double iy : y_rap){
+                polarization_exact_rapidity(ipt, iphi, iy, particle, components[0], fout0);
+                polarization_exact_rapidity(ipt, iphi, iy, particle, components[1], fout1);
+                polarization_exact_rapidity(ipt, iphi, iy, particle, components[2], fout2);
+                polarization_exact_rapidity(ipt, iphi, iy, particle, components[3], fout3);
+                polarization_exact_rapidity(ipt, iphi, iy, particle, components[4], fout4);
+            }
+        }
+    }
+
 }
  
 
