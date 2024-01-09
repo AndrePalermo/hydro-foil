@@ -367,6 +367,17 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 
 }
 
+void polarization_components(double pT, double phi, double y_rap, pdg_particle particle, std::array<vector<element>,5> components, std::array<ofstream,5> fileout_list){
+
+    polarization_exact_rapidity(pT, phi, y_rap, particle, components[0], fileout_list[0]);
+    polarization_exact_rapidity(pT, phi, y_rap, particle, components[1], fileout_list[1]);
+    polarization_exact_rapidity(pT, phi, y_rap, particle, components[2], fileout_list[2]);
+    polarization_exact_rapidity(pT, phi, y_rap, particle, components[3], fileout_list[3]);
+    polarization_exact_rapidity(pT, phi, y_rap, particle, components[4], fileout_list[4]);
+    
+}
+ 
+
 void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, 
     interpolator &spectrum_interpolator, array<interpolator,4> &S_vorticity_interpolator, array<interpolator,4> &S_shear_interpolator, ofstream &fileout){
     pdg_particle lambda(3122);
