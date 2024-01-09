@@ -24,9 +24,19 @@ read_hypersrface(surface_file, hypersup);
 
 std::array<vector<element>,5> comp_FO = components_freeze_out(hypersup);
 
-
-
-
+// for(int iii=0;iii<5;iii++){
+// 	cout<<"check "<<iii<<endl;
+// 	cout<<comp_FO[iii].size()<<" "<<hypersup.size()<<endl;
+// for(element cell : comp_FO[iii]){
+// 	for(int mu=0; mu<4;mu++){
+// 		for(int nu=0; nu<4;nu++){
+// 			if(std::isnan(cell.dbeta[mu][nu])){
+// 				cout<<"NAN ecnounter!"<<endl;
+// 			}
+// 		}	
+// 	}
+// }
+// }
 
 std::array<string,5> components_names={output_folder+"/vort_acc",
 									   output_folder+"/shear_acc",

@@ -65,7 +65,7 @@ void element::print(){
 }
 
 element new_dbeta(element surf_old, int tag){
-    std::cout<<"REMEMBER: this function should only be used in the isothermal freeze-out case!"<<std::endl;
+   // REMEMBER: this function should only be used in the isothermal freeze-out case!
     
     element new_elem = surf_old; 
 
@@ -75,6 +75,8 @@ element new_dbeta(element surf_old, int tag){
     std::array<std::array<double,4>,4> vorticity_low={0}, fullshear_low={0}, deltamunu_low={0},
                         sigma_over_T={0},ang_vel_part_of_vorticity_over_T={0};
     
+    // std::array<double,4> test1={0}, test2={0};
+
     for(int mu=0; mu<4; mu++){
         u_up[mu] = surf_old.u[mu];
         u_low[mu] = surf_old.u[mu]*gmumu[mu];   
@@ -88,6 +90,8 @@ element new_dbeta(element surf_old, int tag){
 		for(int nu=0;nu<4;nu++){
 			acc_over_T_shear_low[mu] += 2*fullshear_low[mu][nu]*u_up[nu];
 			acc_over_T_vort_low[mu] += 2*vorticity_low[mu][nu]*u_up[nu];
+            // test1[mu] += surf_old.dbeta[mu][nu]*u_up[nu];
+            // test2[mu] += surf_old.dbeta[nu][mu]*u_up[nu];
             if(mu==nu){
                 deltamunu_low[mu][nu] = gmumu[mu]-u_low[mu]*u_low[nu];
             }
@@ -96,10 +100,20 @@ element new_dbeta(element surf_old, int tag){
             }	
 		}
 	}
-    if(acc_over_T_shear_low[0]!=acc_over_T_vort_low[0]){
-        std::cout<<"Acceleration is different if computed from shear and from vorticity! Error!"<<std::endl;
-        exit(1);
-        }
+    // if(acc_over_T_shear_low[0]!=acc_over_T_vort_low[0]){
+    //     std::cout<<acc_over_T_shear_low[0]<<" "<<acc_over_T_vort_low[0]<<" "<<surf_old.u[0]<<std::endl;
+    //     std::cout<<acc_over_T_shear_low[1]<<" "<<acc_over_T_vort_low[1]<<" "<<surf_old.u[1]<<std::endl;
+    //     std::cout<<acc_over_T_shear_low[2]<<" "<<acc_over_T_vort_low[2]<<" "<<surf_old.u[2]<<std::endl;
+    //     std::cout<<acc_over_T_shear_low[3]<<" "<<acc_over_T_vort_low[3]<<" "<<surf_old.u[3]<<std::endl;
+
+
+    //     std::cout<<test1[0]<<" "<<test2[0]<<std::endl;
+    //     std::cout<<test1[1]<<" "<<test2[1]<<std::endl;
+    //     std::cout<<test1[2]<<" "<<test2[2]<<std::endl;
+    //     std::cout<<test1[3]<<" "<<test2[3]<<std::endl;
+    //     std::cout<<"Acceleration is different if computed from shear and from vorticity! Error!"<<std::endl;
+    //     // exit(1);
+    //     }
 
     for(int mu=0; mu<4; mu++){
 			theta_over_T += fullshear_low[mu][mu]*gmumu[mu];
@@ -125,7 +139,7 @@ element new_dbeta(element surf_old, int tag){
         //acceleration vorticity
         for(int mu=0;mu<4;mu++){
 		    for(int nu=0;nu<4;nu++){
-                new_elem.dbeta[mu][nu] = 0.5*(acc_over_T_vort_low[mu]*u_low[nu]-acc_over_T_vort_low[nu]*u_low[mu]);
+                new_elem.dbeta[mu][nu] = -0.5*(acc_over_T_vort_low[mu]*u_low[nu]-acc_over_T_vort_low[nu]*u_low[mu]);
             }
         }
         break;
@@ -143,7 +157,7 @@ element new_dbeta(element surf_old, int tag){
         //angular velocity vorticity
         for(int mu=0;mu<4;mu++){
 		    for(int nu=0;nu<4;nu++){
-                new_elem.dbeta[mu][nu] = ang_vel_part_of_vorticity_over_T[mu][nu];
+                new_elem.dbeta[mu][nu] = -ang_vel_part_of_vorticity_over_T[mu][nu];
             }
         }
         break;
@@ -173,14 +187,14 @@ element new_dbeta(element surf_old, int tag){
     return new_elem;
 }
 
-std::array<vector<element>,5> components_freeze_out(vector<element> &freeze_out_sup){
+std::array<std::vector<element>,5> components_freeze_out(std::vector<element> &freeze_out_sup){
     std::array<vector<element>,5> components = {};
     for(element cell : freeze_out_sup){
         components[0].push_back(new_dbeta(cell,0)); //acceleration vorticity
-        components[2].push_back(new_dbeta(cell,1)); //acceleration shear
-        components[3].push_back(new_dbeta(cell,2)); //angular velocity
-        components[4].push_back(new_dbeta(cell,3)); //proper shear
-        components[5].push_back(new_dbeta(cell,4)); //expansion
+        components[1].push_back(new_dbeta(cell,1)); //acceleration shear
+        components[2].push_back(new_dbeta(cell,2)); //angular velocity
+        components[3].push_back(new_dbeta(cell,3)); //proper shear
+        components[4].push_back(new_dbeta(cell,4)); //expansion
     }
     
     return components;

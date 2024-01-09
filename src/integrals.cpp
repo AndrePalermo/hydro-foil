@@ -246,7 +246,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     for(element cell : freeze_out_sup){ //loop over the FO hypersurface
         double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
         array<double,4> theta_vector = {0,0,0,0};
-        double theta_sq = 0.;
+        double theta_sq = -1e-20;
 
         for(int mu=0; mu<4; mu++){
             for(int nu=0; nu<4; nu++)
@@ -263,6 +263,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
             pu += p[mu] * cell.u[mu] * gmumu[mu];
             theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
         }
+        
         const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
         const double distribution = 1 / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
 
@@ -306,6 +307,7 @@ for(double k=-spin; k<=spin;k++){
         }
 
 if(num/den != num/den){
+    cout<<abs_theta<<endl;
     cout<<"NaN in aux_exact_polarization!"<<endl;
     exit(1);
 }
@@ -367,7 +369,7 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 
 }
 
-void polarization_components(pdg_particle particle, std::array<vector<element>,5> components, std::array<string,5> fileout_list){
+void polarization_components(pdg_particle particle, std::array<vector<element>,5> &components, std::array<string,5> &fileout_list){
     int size_pt = 20;
     int size_phi = 30;
     int size_y = 20;
