@@ -20,5 +20,6 @@ struct element {
 void read_hypersrface(std::string filename, std::vector<element> &hypersurface);
 
 element new_dbeta(element surf_old, int tag);
+std::array<std::vector<element>,5> components_freeze_out(std::vector<element> &freeze_out_sup);
 
 #endif
