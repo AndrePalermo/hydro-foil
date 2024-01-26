@@ -9,7 +9,7 @@ PDG_FLAG = -DPDG_PATH=\"$(PWD)/pdg_database/baryons_mesons.txt\"
 SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp, $(OBJ_DIR)/%.o, $(SOURCES))
 
-TARGET = foil #Freeze-Out IntegraL
+TARGET = foil_components #Freeze-Out IntegraL, compoents branch 
 
 ########################################################################################
 
