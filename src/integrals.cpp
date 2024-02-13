@@ -371,7 +371,7 @@ void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particl
 
 void polarization_components(pdg_particle particle, std::array<vector<element>,5> &components, std::array<string,5> &fileout_list){
     int size_pt = 20;
-    int size_phi = 30;
+    int size_phi = 40;
     int size_y = 20;
     std::vector<double> pT = linspace(0,6.2,size_pt);
     std::vector<double> phi =  linspace(0,2*PI,size_phi);
