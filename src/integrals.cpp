@@ -548,10 +548,10 @@ void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_parti
             }
             
             //compute integrals in phi  
-            integralphi_den += dangle*spectrum*jacobian;
+            integralphi_den += dangle*jacobian*spectrum/Energy_mother; //the n(P) in eq. 29 of 1905.03123 is no the invariant one, hence the /Energy_mother
             for(int mu=0;mu<3;mu++){
-                integralphi_num[mu] += dangle*jacobian*S_vect[mu]; //the spectrum is not present because it simplify with the denominator in the polarization formula
-                integralphi_numShear[mu] += dangle*jacobian*S_vectShear[mu];
+                integralphi_num[mu] += dangle*jacobian*(S_vect[mu]/spectrum) *spectrum/Energy_mother; //    S/spectrum = spin vector; spectrum/Energy_mother =  n(P) in eq 29 of 1905.03123
+                integralphi_numShear[mu] += dangle*jacobian*(S_vectShear[mu]/spectrum) *spectrum/Energy_mother;
             }
         } //end loop in iph
         //compute integral in theta
