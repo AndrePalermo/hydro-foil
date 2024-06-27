@@ -21,10 +21,6 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
 //same as the previous function but uses the linear approximation for the vorticity induced polarization. This function is faster.
 void polarization_midrapidity_linear(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
-//Similar to "polarization_midrapidity_linear" but computes polarization projecting the gradients 
-//tangent to the hypersurface at point x before integrating  
-void polarization_projected(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
-
 //Same as "polarization_midrapidity", but the table now includes the rapidity "y":
 //pt phi y denominator numerator_varpi numerator_xi
 void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
@@ -38,13 +34,15 @@ int statistics(double spin);
 //integrates the thermal spectrum of "particle"
 void spectrum_rapidity(double pT, double phi, double y_rap, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout);
 
+//Gets feed down polarization interpolating from tables
 void Lambda_polarization_FeedDown(double pT, double phi, double y_rap, pdg_particle mother, 
     interpolator &spectrum_interpolator, array<interpolator,4> &S_vorticity_interpolator, array<interpolator,4> &S_shear_interpolator, ofstream &fileout);
 
+//prints components of polarization coming from different hydro gradients
 void polarization_components(pdg_particle particle, 
         std::array<vector<element>,5> components, std::array<string,5> fileout_list);
 
-void Lambda_FeedDown_nointerpolation(double pT, double phi, double y_rap, pdg_particle mother, 
-    vector<element> &freeze_out_sup, ofstream &fileout);
+// DEPRECATED void Lambda_FeedDown_nointerpolation(double pT, double phi, double y_rap, pdg_particle mother, 
+//     vector<element> &freeze_out_sup, ofstream &fileout);
 
 #endif

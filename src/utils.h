@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <vector>
+#include <chrono>
 
 
 const std::array<int,4> gmumu = {1,-1,-1,-1};
@@ -42,5 +43,15 @@ class interpolator{
         double f_index(int ix, int iy, int iz);
 
 };
+
+constexpr std::array<std::array<int,4>, 24> NonZeroIndicesLeviCivita() {
+    ///List of arrays of indices for which the Levi Civita symbol is non-zero
+    return {{
+        {0, 1, 2, 3}, {0, 2, 1, 3}, {0, 3, 1, 2}, {0, 1, 3, 2}, {0, 3, 2, 1}, {0, 2, 3, 1},
+        {1, 0, 2, 3}, {1, 2, 0, 3}, {1, 3, 0, 2}, {1, 0, 3, 2}, {1, 2, 3, 0}, {1, 3, 2, 0},
+        {2, 0, 1, 3}, {2, 1, 0, 3}, {2, 3, 0, 1}, {2, 0, 3, 1}, {2, 1, 3, 0}, {2, 3, 1, 0},
+        {3, 0, 1, 2}, {3, 1, 0, 2}, {3, 2, 0, 1}, {3, 0, 2, 1}, {3, 1, 2, 0}, {3, 2, 1, 0},       
+    }};
+}
 
 #endif
