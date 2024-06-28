@@ -39,13 +39,14 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
         array<double,4> theta_vector = {0,0,0,0};
         double theta_sq = 0.;
 
-        for(array<int,4> indices : NonZeroIndicesLeviCivita()){
-            int mu = indices[0];
-            int nu = indices[1];
-            int rh = indices[2];
-            int sg = indices[3];
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)
             
-            theta_vector[mu] += levi(mu, nu, rh, sg)
+            theta_vector[mu] += LeviCivita
                                 * p_[sg] * cell.dbeta[nu][rh]/(2*mass)*hbarC; //hbarC makes theta adimensional
 		           
         }
@@ -66,15 +67,16 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
                         (cosh(sqrt(-theta_sq)*0.5)+exp(-(pu - mutot)/cell.T));
         }
 
-        for(array<int,4> indices : NonZeroIndicesLeviCivita()){
-            int mu = indices[0];
-            int nu = indices[1];
-            int rh = indices[2];
-            int sg = indices[3];
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)
 
             if(nu==0)
             for(int ta=0; ta<4; ta++){
-            P_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)*t_vect[nu]* p_[sg] * p[ta] / p[0] 
+            P_shear[mu] += - pdSigma * nf * (1. - nf) * LeviCivita*t_vect[nu]* p_[sg] * p[ta] / p[0] 
                         * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
             }
         }
@@ -121,21 +123,21 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
         const double nf = 1 / (exp( (pu - mutot) / cell.T) + 1.0);
 
         Denominator += pdSigma * nf ;
-        for(array<int,4> indices : NonZeroIndicesLeviCivita()){
-            int mu = indices[0];
-            int nu = indices[1];
-            int rh = indices[2];
-            int sg = indices[3];
-                
-            P_vorticity[mu] += pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)      
+            P_vorticity[mu] += pdSigma * nf * (1. - nf) * LeviCivita
                                     * p_[sg] * cell.dbeta[nu][rh];
                     
             if(nu==0)
             for(int ta=0; ta<4; ta++)
-            P_shear[mu] += -pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
+            P_shear[mu] += -pdSigma * nf * (1. - nf) * LeviCivita
                         * p_[sg] * (p[ta] / p[0]) *t_vector[nu]
                         * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh]);
-                    }
+        }
     }
     //print to file
     fileout << "   " << pT << "   " << phi << "   " << Denominator;
@@ -174,12 +176,13 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
         array<double,4> theta_vector = {0,0,0,0};
         double theta_sq = 0.;
 
-        for(array<int,4> indices : NonZeroIndicesLeviCivita()){
-            int mu = indices[0];
-            int nu = indices[1];
-            int rh = indices[2];
-            int sg = indices[3];
-		                theta_vector[mu] += levi(mu, nu, rh, sg)
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];//levi(mu,nu,rh,sg)
+		                theta_vector[mu] += LeviCivita
                                 * p_[sg] * cell.dbeta[nu][rh]/(2*mass)*hbarC; //theta is adimensional
 		   }
 
@@ -200,16 +203,17 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
                         aux_exact_polarization(spin, pu, cell.T, mutot, sqrt(-theta_sq));
         }
             // computing the shear induced polarization
-            for(array<int,4> indices : NonZeroIndicesLeviCivita()){
-            int mu = indices[0];
-            int nu = indices[1];
-            int sg = indices[2];
-            int ta = indices[3];
+            for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int sg = indices_an_levi[2];
+            int ta = indices_an_levi[3];
+            int LeviCivita = indices_an_levi[4];//levi(mu,nu,sg,ta)
 
             if(nu==0)
             for(int rh=0; rh<4; rh++){
                 P_shear[mu] += - phase_space*(spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
-                            * levi(mu, nu, sg, ta)* (p_[ta]/mass) * (p[rh]/p[0]) 
+                            * LeviCivita* (p_[ta]/mass) * (p[rh]/p[0]) 
                             *hbarC*( cell.dbeta[sg][rh] + cell.dbeta[rh][sg])/ 2.0;
                             //hbarC: unit conversion to make the shear adimensional 
                     }
@@ -225,6 +229,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     fileout << endl;
 
 }
+
 
 double aux_exact_polarization(double spin, double pu, double T, double mutot, double abs_theta){
 double num = 0;
