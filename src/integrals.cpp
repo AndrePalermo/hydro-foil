@@ -14,10 +14,10 @@
 
 
 //for a description of the functions refer to integrals.h
-
 void polarization_midrapidity(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
     double P_vorticity[4] = {0,0,0,0};
     double P_shear[4] = {0,0,0,0};
+    int t_vect[4] = {1,0,0,0};
     double Denominator = 0;
 
     // get particle's info
@@ -39,14 +39,16 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
         array<double,4> theta_vector = {0,0,0,0};
         double theta_sq = 0.;
 
-        for(int mu=0; mu<4; mu++){
-            for(int nu=0; nu<4; nu++)
-                for(int rh=0; rh<4; rh++)
-                    for(int sg=0; sg<3; sg++){ //sg=3 is zero because p_[3]=0. This speeds up the program
-		                theta_vector[mu] += levi(mu, nu, rh, sg)
-                                * p_[sg] * cell.dbeta[nu][rh]/(2*mass); 
-		   }
-           theta_vector[mu] *= hbarC; //now theta is adimensional 
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)
+            
+            theta_vector[mu] += LeviCivita
+                                * p_[sg] * cell.dbeta[nu][rh]/(2*mass)*hbarC; //hbarC makes theta adimensional
+		           
         }
 
         for (int mu = 0; mu < 4; mu++) {
@@ -63,17 +65,23 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
             P_vorticity[mu] += 0.5*pdSigma * nf *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * sinh(sqrt(-theta_sq)*0.5)/
                         (cosh(sqrt(-theta_sq)*0.5)+exp(-(pu - mutot)/cell.T));
-
-            for(int rh=0; rh<4; rh++)
-                for(int sg=0; sg<3; sg++) {  //since we are at midrapidity p_[3]=0 and we can stop at sg=2
-                    // computing the shear induced polarization
-
-                    for(int ta=0; ta<4; ta++)
-                    P_shear[mu] += - pdSigma * nf * (1. - nf) * levi(mu, 0, rh, sg)* p_[sg] * p[ta] / p[0] 
-                                * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
-                }
         }
-    }
+
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)
+
+            if(nu==0)
+            for(int ta=0; ta<4; ta++){
+            P_shear[mu] += - pdSigma * nf * (1. - nf) * LeviCivita*t_vect[nu]* p_[sg] * p[ta] / p[0] 
+                        * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh])/ (8.0 * mass);
+            }
+        }
+
+    } //end surface loop
 
     //print to file
     fileout << "   " << pT << "   " << phi << "   " << Denominator;
@@ -81,86 +89,6 @@ void polarization_midrapidity(double pT, double phi, pdg_particle particle, vect
         fileout << "   " << P_vorticity[mu];
     for(int mu=0; mu<4; mu++)
         fileout << "   " << P_shear[mu] *hbarC; //Unit conversion to make the shear adimensional 
-    fileout << endl;
-
-}
-
-void polarization_projected(double pT, double phi, pdg_particle particle, vector<element> &freeze_out_sup, ofstream &fileout){
-    double P_vorticity[4] = {0,0,0,0};
-    double P_shear[4] = {0,0,0,0};
-    double Denominator = 0;
-
-    // get particle's info
-    const double mass = particle.get_mass();  //GeV
-    const int baryonNumber = particle.get_b();
-    const int electricCharge = particle.get_q();
-    const int strangeness = particle.get_s();
-
-    double mT = sqrt(mass * mass + pT*pT);
-    array<double,4> p = {mT, pT *cos(phi), pT *sin(phi), 0};
-    array<double,4> p_ = {mT, -pT *cos(phi), -pT *sin(phi), 0}; //lower indices    
-
-    #ifdef OPEN_MP
-        int threads_ = NTHREADS; 
-        #pragma omp parallel for num_threads(threads_) reduction(+:Denominator,P_vorticity,P_shear)
-    #endif
-    for(element cell : freeze_out_sup){ //loop over the FO hypersurface
-        double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
-        double projector[4][4], projected_gradient[4][4];
-        double normal_size=0; //takes into account the normalization of the normal vector
-
-        for(int mu = 0; mu < 4; mu++){
-            normal_size += cell.dsigma[mu]*cell.dsigma[mu]*gmumu[mu];
-        }
-
-        for(int mu = 0; mu < 4; mu++){
-            for(int nu = 0; nu < 4; nu++){
-                projector[mu][nu] = g(mu,nu) - cell.dsigma[mu]*cell.dsigma[nu]/(normal_size); //projector with lower indices
-                projected_gradient[mu][nu] = 0;
-            }
-        } 
-
-        for(int mu = 0; mu < 4; mu++){
-            for(int nu = 0; nu < 4; nu++){
-                for(int alpha = 0; alpha < 4; alpha++){
-                    for(int sigma = 0; sigma < 4; sigma++){
-                        projected_gradient[mu][nu] += projector[mu][alpha]*g(alpha,sigma)*cell.dbeta[sigma][nu]; //lower indices
-                        //NOTE: cell.dbeta[sigma][nu] = \partial_\sigma \beta_\nu
-                    }
-                }
-            }
-        }    
-
-        for (int mu = 0; mu < 4; mu++) {
-            pdSigma += p[mu] * cell.dsigma[mu];
-            pu += p[mu] * cell.u[mu] * gmumu[mu];
-        }
-        const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
-        const double nf = 1 / (exp( (pu - mutot) / cell.T) + 1.0);
-
-        Denominator += pdSigma * nf ;
-        for(int mu=0; mu<4; mu++)
-            for(int nu=0; nu<4; nu++)
-                for(int rh=0; rh<4; rh++)
-                    for(int sg=0; sg<4; sg++) {
-                        
-                        P_vorticity[mu] += pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
-                                                * p_[sg] * projected_gradient[nu][rh];
-                        
-                        if(nu==0)
-                        for(int ta=0; ta<4; ta++)
-                        P_shear[mu] += -pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
-                                    * p_[sg] * (p[ta] / p[0]) *t_vector[nu]
-                                    * ( projected_gradient[rh][ta] + projected_gradient[ta][rh]);
-                    }
-    }
-
-    //print to file
-    fileout << "   " << pT << "   " << phi << "   " << Denominator;
-    for(int mu=0; mu<4; mu++)
-        fileout << "   " << P_vorticity[mu]/ (8.0 * mass) *hbarC; //unit conversion to make the vorticity adimensional
-    for(int mu=0; mu<4; mu++)
-        fileout << "   " << P_shear[mu]/ (8.0 * mass) *hbarC; //Unit conversion to make the shear adimensional 
     fileout << endl;
 
 }
@@ -195,22 +123,22 @@ void polarization_midrapidity_linear(double pT, double phi, pdg_particle particl
         const double nf = 1 / (exp( (pu - mutot) / cell.T) + 1.0);
 
         Denominator += pdSigma * nf ;
-        for(int mu=0; mu<4; mu++)
-            for(int nu=0; nu<4; nu++)
-                for(int rh=0; rh<4; rh++)
-                    for(int sg=0; sg<4; sg++) {
-                        
-                        P_vorticity[mu] += pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
-                                                * p_[sg] * cell.dbeta[nu][rh];
-                        
-                        if(nu==0)
-                        for(int ta=0; ta<4; ta++)
-                        P_shear[mu] += -pdSigma * nf * (1. - nf) * levi(mu, nu, rh, sg)
-                                    * p_[sg] * (p[ta] / p[0]) *t_vector[nu]
-                                    * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh]);
-                    }
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];  //levi(mu,nu,rh,sg)      
+            P_vorticity[mu] += pdSigma * nf * (1. - nf) * LeviCivita
+                                    * p_[sg] * cell.dbeta[nu][rh];
+                    
+            if(nu==0)
+            for(int ta=0; ta<4; ta++)
+            P_shear[mu] += -pdSigma * nf * (1. - nf) * LeviCivita
+                        * p_[sg] * (p[ta] / p[0]) *t_vector[nu]
+                        * ( cell.dbeta[rh][ta] + cell.dbeta[ta][rh]);
+        }
     }
-
     //print to file
     fileout << "   " << pT << "   " << phi << "   " << Denominator;
     for(int mu=0; mu<4; mu++)
@@ -246,24 +174,23 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     for(element cell : freeze_out_sup){ //loop over the FO hypersurface
         double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
         array<double,4> theta_vector = {0,0,0,0};
-        double theta_sq = -1e-20;
+        double theta_sq = 0.;
 
-        for(int mu=0; mu<4; mu++){
-            for(int nu=0; nu<4; nu++)
-                for(int rh=0; rh<4; rh++)
-                    for(int sg=0; sg<4; sg++){ 
-		                theta_vector[mu] += levi(mu, nu, rh, sg)
-                                * p_[sg] * cell.dbeta[nu][rh]/(2*mass); 
+        for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int rh = indices_an_levi[2];
+            int sg = indices_an_levi[3]; 
+            int LeviCivita = indices_an_levi[4];//levi(mu,nu,rh,sg)
+		                theta_vector[mu] += LeviCivita
+                                * p_[sg] * cell.dbeta[nu][rh]/(2*mass)*hbarC; //theta is adimensional
 		   }
-           theta_vector[mu] *= hbarC; //now theta is adimensional 
-        }
 
         for (int mu = 0; mu < 4; mu++){
             pdSigma += p[mu] * cell.dsigma[mu];
             pu += p[mu] * cell.u[mu] * gmumu[mu];
             theta_sq += theta_vector[mu]*theta_vector[mu]*gmumu[mu];
         }
-        
         const double mutot = cell.mub*baryonNumber + cell.muq*electricCharge + cell.mus*strangeness;
         const double distribution = 1 / (exp( (pu - mutot) / cell.T) + fermi_or_bose);
 
@@ -274,15 +201,21 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
             P_vorticity[mu] += phase_space*pdSigma * distribution *  
                         (theta_vector[mu]/sqrt(-theta_sq)) * 
                         aux_exact_polarization(spin, pu, cell.T, mutot, sqrt(-theta_sq));
-
+        }
             // computing the shear induced polarization
-            for(int sg=1; sg<4; sg++)
-                for(int ta=1; ta<4; ta++)
-                    for(int rh=0; rh<4; rh++){
-                    P_shear[mu] += - phase_space*(spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
-                                * levi(mu, 0, sg, ta)* (p_[ta]/mass) * (p[rh]/p[0]) 
-                                *hbarC*( cell.dbeta[sg][rh] + cell.dbeta[rh][sg])/ 2.0;
-                                //hbarC: unit conversion to make the shear adimensional 
+            for(array<int,5> indices_an_levi : non_zero_levi()){
+            int mu = indices_an_levi[0];
+            int nu = indices_an_levi[1];
+            int sg = indices_an_levi[2];
+            int ta = indices_an_levi[3];
+            int LeviCivita = indices_an_levi[4];//levi(mu,nu,sg,ta)
+
+            if(nu==0)
+            for(int rh=0; rh<4; rh++){
+                P_shear[mu] += - phase_space*(spin/3)*(spin+1)*pdSigma * distribution * (1. - fermi_or_bose*distribution) 
+                            * LeviCivita* (p_[ta]/mass) * (p[rh]/p[0]) 
+                            *hbarC*( cell.dbeta[sg][rh] + cell.dbeta[rh][sg])/ 2.0;
+                            //hbarC: unit conversion to make the shear adimensional 
                     }
         }
     }
