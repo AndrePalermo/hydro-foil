@@ -28,6 +28,7 @@ if(argc>3){
 
 string surface_file = argv[1];
 string output_folder = argv[2];
+filesystem::create_directories(output_folder);
 
 vector<element> hypersup = {};
 read_hypersrface(surface_file, hypersup);
