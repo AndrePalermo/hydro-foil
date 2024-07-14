@@ -18,32 +18,24 @@ if(argc!=3){
 
 string surface_file = argv[1];
 string output_folder = argv[2];
-
-vector<element> hypersup = {};
-read_hypersrface(surface_file, hypersup);
-
-std::array<vector<element>,5> comp_FO = components_freeze_out(hypersup);
-
-// for(int iii=0;iii<5;iii++){
-// 	cout<<"check "<<iii<<endl;
-// 	cout<<comp_FO[iii].size()<<" "<<hypersup.size()<<endl;
-// for(element cell : comp_FO[iii]){
-// 	for(int mu=0; mu<4;mu++){
-// 		for(int nu=0; nu<4;nu++){
-// 			if(std::isnan(cell.dbeta[mu][nu])){
-// 				cout<<"NAN ecnounter!"<<endl;
-// 			}
-// 		}	
-// 	}
-// }
-// }
+filesystem::create_directories("./"+output_folder);
 
 std::array<string,5> components_names={output_folder+"/vort_acc",
 									   output_folder+"/shear_acc",
 									   output_folder+"/ang_vel",
 									   output_folder+"/proper_shear",
 									   output_folder+"/expansion"};
-	
+
+for(auto names : components_names){
+	filesystem::create_directories("./"+names);
+}
+
+vector<element> hypersup = {};
+read_hypersrface(surface_file, hypersup);
+
+std::array<vector<element>,5> comp_FO = components_freeze_out(hypersup);
+
+
 
 	pdg_particle Lambda(3122);
 	Lambda.print();
