@@ -60,7 +60,7 @@ def Sz_rapidity_polarization(polarization_file, mass=1.115683, rap_cut=1, pt_cut
 
     return np.unique(phi), pol
 
-def Sz_polarization_pT(polarization_file, mass=1.115683, rap_cut=1, vorticity=False, global_integrals = False):
+def Sz_polarization_pT(polarization_file, mass=1.115683, harmonics=2, rap_cut=1, vorticity=False, global_integrals = False):
     '''
     Computes the z component of polarization as a function of pT from the hydro-foil output.
     If vorticity = True plots only the contribution of the vorticity
@@ -95,14 +95,14 @@ def Sz_polarization_pT(polarization_file, mass=1.115683, rap_cut=1, vorticity=Fa
     Pizu = Pizu - Pi0*(mT*np.sinh(y_rap))/(mT*np.cosh(y_rap)+mass)
     
     if dimy>1:
-        Pzsin = Pizu*np.sin(2*phi) 
+        Pzsin = Pizu*np.sin(harmonics*phi) 
         Pz_reahsped = Pzsin.reshape((dimP,dimPhi,dimy))
         dNdP_reshaped = dndp.reshape((dimP,dimPhi,dimy))
         mean_spin = np.trapz(np.trapz(Pz_reahsped,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
         spectra = np.trapz(np.trapz(dNdP_reshaped,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
     else:
         print("Midrapidity only!")
-        Pzsin = Pizu*np.sin(2*phi) 
+        Pzsin = Pizu*np.sin(harmonics*phi) 
         Pz_reahsped = Pzsin.reshape((dimP,dimPhi))
         dNdP_reshaped = dndp.reshape((dimP,dimPhi))
         mean_spin = np.trapz(Pz_reahsped,x=np.unique(phi),axis=1)
@@ -171,6 +171,59 @@ def Sj_rapidity_polarization(polarization_file, mass=1.115683, rap_cut=1, pt_cut
 
     return np.unique(phi), -pol
 
+def Sj_polarization_pT(polarization_file, mass=1.115683, harmonics=2, rap_cut=1, vorticity=False, global_integrals = False):
+    '''
+    Computes the z component of polarization as a function of pT from the hydro-foil output.
+    If vorticity = True plots only the contribution of the vorticity
+    '''
+    filename =  np.loadtxt(polarization_file, unpack=True)
+    pT = filename[0]
+    phi = filename[1]
+    y_rap = filename[2]
+    select = (np.abs(y_rap)<=rap_cut) 
+    pT = pT[select]
+    phi = phi[select]
+    y_rap = y_rap[select]
+
+    dndp = filename[3]
+    dndp = dndp[select]
+    dimP=np.size(np.unique(pT))
+    dimPhi=np.size(np.unique(phi))
+    dimy=np.size(np.unique(y_rap))
+    Pi0 = filename[4]
+    Piyu = filename[6]
+    if(vorticity):
+        vorticity=False
+    else:
+        Pi0 = Pi0 + filename[8]
+        Piyu = Piyu + filename[10]  
+
+    Pi0 = Pi0[select]
+    Piyu = Piyu[select]
+
+    #BACKBOOST to Lambda RF
+    mT = np.sqrt(mass*mass + pT*pT)
+    Piyu = Piyu - Pi0*(pT*np.sin(phi))/(mT*np.cosh(y_rap)+mass)
+
+    if dimy>1:
+        Py = Piyu.reshape((dimP,dimPhi,dimy))
+        dNdP = dndp.reshape((dimP,dimPhi,dimy))
+        mean_spin = np.trapz(np.trapz(Py,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
+        spectra = np.trapz(np.trapz(dNdP,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
+    else:
+        print("Midrapidity only!")
+        Py = Piyu.reshape((dimP,dimPhi))
+        dNdP = dndp.reshape((dimP,dimPhi))
+        mean_spin = np.trapz(Py,x=np.unique(phi),axis=1)
+        spectra = np.trapz(dNdP,x=np.unique(phi),axis=1)
+    
+    if(global_integrals):
+        return np.unique(pT), -mean_spin, spectra
+
+    pol = mean_spin/spectra
+
+    return np.unique(pT), -pol
+
 def Feed_down_Sz_rapidity_polarization(polarization_file, rap_cut=1, pt_cut=10, vorticity=False, global_integrals = False):
     '''
     Computes the z component of polarization as a function of phi from the particlizationCalc output.
@@ -220,7 +273,7 @@ def Feed_down_Sz_rapidity_polarization(polarization_file, rap_cut=1, pt_cut=10, 
 
     return np.unique(phi), pol
 
-def Feed_down_Sz_pT(polarization_file, rap_cut=1, vorticity=False, global_integrals = False):
+def Feed_down_Sz_pT(polarization_file, rap_cut=1, vorticity=False, global_integrals = False, harmonics=2):
     filename =  np.loadtxt(polarization_file, unpack=True)
     pT = filename[0]
     phi = filename[1]
@@ -244,14 +297,14 @@ def Feed_down_Sz_pT(polarization_file, rap_cut=1, vorticity=False, global_integr
     Pizu = Piz[select] ##already in the rest frame
 
     if dimy>1:
-        Pzsin =Pizu*np.sin(2*phi)
+        Pzsin =Pizu*np.sin(harmonics*phi)
         Pz_reshaped = Pzsin.reshape((dimP,dimPhi,dimy))
         dNdP_reshaped = dndp.reshape((dimP,dimPhi,dimy))
         mean_spin = np.trapz(np.trapz(Pz_reshaped,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
         spectra = np.trapz(np.trapz(dNdP_reshaped,x=np.unique(phi),axis=1),x=np.unique(y_rap),axis=1)
     else:
         print("Midrapidity only")
-        Pzsin =Pizu*np.sin(2*phi)
+        Pzsin =Pizu*np.sin(harmonics*phi)
         Pz_reshaped = Pzsin.reshape((dimP,dimPhi))
         dNdP_reshaped = dndp.reshape((dimP,dimPhi))
         mean_spin = np.trapz(Pz_reshaped,x=np.unique(phi),axis=1)
@@ -263,6 +316,49 @@ def Feed_down_Sz_pT(polarization_file, rap_cut=1, vorticity=False, global_integr
     pol = mean_spin/spectra
 
     return np.unique(pT), pol
+
+def Feed_down_Sj_pT(polarization_file, rap_cut=1, vorticity=False, global_integrals = False):
+    filename =  np.loadtxt(polarization_file, unpack=True)
+    pT = filename[0]
+    phi = filename[1]
+    y_rap = filename[2]
+    select = (np.abs(y_rap)<rap_cut)
+    pT = pT[select]
+    phi = phi[select]
+    y_rap = y_rap[select]
+
+    dndp = filename[3]
+    dndp = dndp[select]
+    dimP=np.size(np.unique(pT))
+    dimPhi=np.size(np.unique(phi))
+    dimy=np.size(np.unique(y_rap))
+    Piy = filename[5]
+    if(vorticity):
+        vorticity=False
+    else:
+        Piy = Piy + filename[8] 
+
+    Piyu = Piy[select] ##already in the rest fraem
+
+    if dimy>1:
+        Py = Piyu.reshape((dimP,dimPhi,dimy))
+        dNdP = dndp.reshape((dimP,dimPhi,dimy))
+        mean_spin = np.trapz(np.trapz(Py,x=np.unique(y_rap),axis=2),x=np.unique(phi),axis=1)
+        spectra = np.trapz(np.trapz(dNdP,x=np.unique(y_rap),axis=2),x=np.unique(phi),axis=1)
+    else:
+        print("Midrapidity only!")
+        Py = Piyu.reshape((dimP,dimPhi))
+        dNdP = dndp.reshape((dimP,dimPhi))
+        mean_spin = np.trapz(Py,x=np.unique(phi),axis=1)
+        spectra = np.trapz(dNdP,x=np.unique(phi),axis=1)
+        
+    if(global_integrals):
+        return np.unique(pT), -mean_spin, spectra
+
+    pol = mean_spin/spectra
+
+    return np.unique(pT), -pol
+
 
 def Feed_down_Sj_rapidity_polarization(polarization_file, rap_cut=1, pt_cut=10, vorticity=False, global_integrals = False):
     '''
@@ -336,13 +432,16 @@ def global_feed_down_spin(file,**kwargs):
 
     return Pj/dnj,Pzsin2phi/dnz
 
-def centrality_polarization(dir_list, feed_down = False,**kwargs):
+def centrality_polarization(dir_list, feed_down = True,**kwargs):
     centrality_dict = {"0-5" : 2.5,
                        "5-10" : 7.5,
                        "10-20" : 15,
                        "20-30" : 25,
                        "30-40" : 35,
-                       "40-50" : 45}
+                       "40-50" : 45,
+                       "50-60" : 55,
+                       "60-70" : 65,
+                       "70-80" : 75}
     cent_ = np.array([])
     cent_Pz = np.array([])
     cent_Pj = np.array([])
