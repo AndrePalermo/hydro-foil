@@ -174,7 +174,7 @@ void polarization_exact_rapidity(double pT, double phi, double y_rap, pdg_partic
     for(element cell : freeze_out_sup){ //loop over the FO hypersurface
         double pdSigma = 0., pu = 0.;  //scalar products p\cdot d\Sigma and p\cdot u (u is the four velocity)
         array<double,4> theta_vector = {0,0,0,0};
-        double theta_sq = 0.;
+        double theta_sq = -1e-20;
 
         for(array<int,5> indices_an_levi : non_zero_levi()){
             int mu = indices_an_levi[0];

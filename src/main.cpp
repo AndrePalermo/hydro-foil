@@ -26,16 +26,10 @@ std::array<string,5> components_names={output_folder+"/vort_acc",
 									   output_folder+"/proper_shear",
 									   output_folder+"/expansion"};
 
-for(auto names : components_names){
-	filesystem::create_directories("./"+names);
-}
-
 vector<element> hypersup = {};
 read_hypersrface(surface_file, hypersup);
 
 std::array<vector<element>,5> comp_FO = components_freeze_out(hypersup);
-
-
 
 	pdg_particle Lambda(3122);
 	Lambda.print();
