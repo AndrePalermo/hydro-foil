@@ -433,15 +433,15 @@ def global_feed_down_spin(file,**kwargs):
     return Pj/dnj,Pzsin2phi/dnz
 
 def centrality_polarization(dir_list, feed_down = True,**kwargs):
-    centrality_dict = {"0-5" : 2.5,
-                       "5-10" : 7.5,
-                       "10-20" : 15,
-                       "20-30" : 25,
-                       "30-40" : 35,
-                       "40-50" : 45,
-                       "50-60" : 55,
-                       "60-70" : 65,
-                       "70-80" : 75}
+    centrality_dict = {"_0-5" : 2.5,
+                       "_5-10" : 7.5,
+                       "_10-20" : 15,
+                       "_20-30" : 25,
+                       "_30-40" : 35,
+                       "_40-50" : 45,
+                       "_50-60" : 55,
+                       "_60-70" : 65,
+                       "_70-80" : 75}
     cent_ = np.array([])
     cent_Pz = np.array([])
     cent_Pj = np.array([])
@@ -458,7 +458,8 @@ def centrality_polarization(dir_list, feed_down = True,**kwargs):
         for range in centrality_dict.keys():
             if range in dir:
                 centrality = centrality_dict[range]
-                cent_ = np.append(cent_,centrality)
+                
+        cent_ = np.append(cent_,centrality)
 
         if(feed_down):
             Pjsigma0, Pzsin2phisigma0 = global_feed_down_spin(f"{dir}/FeedDown_Sigma0",**kwargs)
