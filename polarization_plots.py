@@ -458,8 +458,7 @@ def centrality_polarization(dir_list, feed_down = True,**kwargs):
         for range in centrality_dict.keys():
             if range in dir:
                 centrality = centrality_dict[range]
-        
-        cent_ = np.append(cent_,centrality)
+                cent_ = np.append(cent_,centrality)
 
         if(feed_down):
             Pjsigma0, Pzsin2phisigma0 = global_feed_down_spin(f"{dir}/FeedDown_Sigma0",**kwargs)
